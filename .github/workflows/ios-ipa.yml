@@ -1,0 +1,70 @@
+# iPhone'a kurulacak imzasız IPA'yı derler. Mac gerekmez: GitHub'ın macOS makinesinde çalışır.
+# Çıktı: Actions → bu iş → Artifacts → "Kor-ipa" (Kor.ipa). İmzalamayı kullanıcı kendi
+# bilgisayarında Sideloadly + ücretsiz Apple ID ile yapar (7 günde bir yenilenir).
+name: iOS IPA
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, master]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ios-ipa-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ipa:
+    # Capacitor 8, Xcode 26 ister.
+    runs-on: macos-26
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Xcode sürümü
+        run: xcodebuild -version
+
+      - name: Bağımlılıklar
+        run: npm ci
+
+      - name: Web derlemesi ve testler
+        run: |
+          npx vitest run
+          npm run build
+
+      - name: iOS projesine kopyala
+        run: npx cap sync ios
+
+      - name: İmzasız uygulama derlemesi
+        run: |
+          xcodebuild \
+            -project ios/App/App.xcodeproj \
+            -scheme App \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            build
+
+      - name: IPA paketi
+        run: |
+          mkdir -p Payload
+          cp -R build/Build/Products/Release-iphoneos/App.app Payload/
+          zip -qry Kor.ipa Payload
+          ls -lh Kor.ipa
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Kor-ipa
+          path: Kor.ipa
+          retention-days: 30
