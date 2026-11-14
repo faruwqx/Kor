@@ -887,6 +887,13 @@ const d: Record<string, string> = {
   'Excel dosyası okunamadı. .xlsx olduğundan emin ol (.xls desteklenmez).':
     'Couldn’t read the Excel file. Make sure it’s .xlsx (.xls is not supported).',
   'CSV, Excel (.xlsx), TSV ya da Kor yedeği (.json)': 'CSV, Excel (.xlsx), TSV or a Kor backup (.json)',
+  'Premium kodu': 'Premium code',
+  'Kodun varsa gir, Premium açılsın': 'If you have a code, enter it to unlock Premium',
+  'Kodu gir': 'Enter code',
+  Kullan: 'Redeem',
+  'Premium açıldı': 'Premium unlocked',
+  'Kod geçersiz': 'Invalid code',
+  'Tüm özellikler açık': 'All features unlocked',
 }
 
 export default d

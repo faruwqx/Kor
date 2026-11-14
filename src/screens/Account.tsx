@@ -16,8 +16,9 @@ import {
   startTrial,
   syncNow,
   useCloud,
+  usePremium,
 } from '../lib/cloud'
-import { FREE_HISTORY_DAYS, FREE_ROUTINES, isPremium } from '../lib/cloud-core'
+import { FREE_HISTORY_DAYS, FREE_ROUTINES } from '../lib/cloud-core'
 import {
   TRIAL_DAYS,
   detectCountry,
@@ -262,7 +263,7 @@ export function AccountSection() {
   const c = useCloud()
   const [auth, setAuth] = useState(false)
   const [del, setDel] = useState(false)
-  const premium = isPremium(c.sub)
+  const premium = usePremium()
 
   // Premium girişi hesap olmasa da görünür: paketlere ve fiyatlara herkes bakabilsin.
   const premiumCard = (sub: string) => (
@@ -405,7 +406,7 @@ export function Premium() {
   const [plan, setPlan] = useState<Plan>('yearly')
   const [auth, setAuth] = useState(false)
   const [busy, setBusy] = useState(false)
-  const premium = isPremium(c.sub)
+  const premium = usePremium()
   const trialLeft = !c.sub
   const saving = yearlySaving(price)
 

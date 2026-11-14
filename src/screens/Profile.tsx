@@ -16,12 +16,13 @@ import {
   Upload,
 } from 'lucide-react'
 import { useRef, useState } from 'react'
-import { useCloud } from '../lib/cloud'
+import { useCloud, usePremium } from '../lib/cloud'
 import { int, parseNum, relDay, timer } from '../lib/format'
 import { bodyweightRange, fromW, toW, wBig, wNum1, wUnit } from '../lib/units'
 import { routineSummary, useBoard } from '../lib/hooks'
 import { toCsv } from '../lib/importer'
 import { PLACEMENT_GROUPS } from '../lib/rank'
+import { redeemed } from '../lib/cloud-core'
 import { go } from '../lib/router'
 import { streak, workoutVolume } from '../lib/stats'
 import { actions, currentBodyweight, getState, parseBackup, useApp } from '../lib/store'
@@ -33,6 +34,16 @@ import { t } from '../lib/i18n'
 
 export function Profile() {
   const s = useApp()
+  const premium = usePremium()
+  const [redeemCode, setRedeemCode] = useState('')
+  const applyRedeem = () => {
+    const c = redeemCode.trim().toUpperCase()
+    if (redeemed({ redeem: c })) {
+      actions.updateSettings({ redeem: c })
+      setRedeemCode('')
+      toast(t('Premium açıldı'))
+    } else toast(t('Kod geçersiz'))
+  }
   const cloud = useCloud()
   const p = s.profile!
   const bw = currentBodyweight(s)
@@ -376,6 +387,47 @@ export function Profile() {
           </div>
           <ChevronRight className="chev" />
         </button>
+      </div>
+
+      <div className="section">
+        <h2>{t('Premium')}</h2>
+      </div>
+      <div className="card card--flush rows menu" style={{ padding: '4px 12px' }}>
+        {premium ? (
+          <div className="row">
+            <div className="row__main">
+              <div>{t('Premium etkin')}</div>
+              <div className="row__sub">{t('Tüm özellikler açık')}</div>
+            </div>
+          </div>
+        ) : (
+          <div className="row" style={{ flexWrap: 'wrap' }}>
+            <div className="row__main" style={{ flexBasis: '100%' }}>
+              <div className="row__title">{t('Premium kodu')}</div>
+              <div className="row__sub">{t('Kodun varsa gir, Premium açılsın')}</div>
+            </div>
+            <div style={{ display: 'flex', gap: 8, flexBasis: '100%' }}>
+              <input
+                className="input"
+                style={{ flex: 1 }}
+                value={redeemCode}
+                onChange={(e) => setRedeemCode(e.target.value)}
+                placeholder={t('Kodu gir')}
+                aria-label={t('Premium kodu')}
+                autoCapitalize="characters"
+                autoCorrect="off"
+                spellCheck={false}
+              />
+              <button
+                className="btn btn--primary btn--sm"
+                disabled={!redeemCode.trim()}
+                onClick={applyRedeem}
+              >
+                {t('Kullan')}
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="section">

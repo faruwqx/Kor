@@ -1,7 +1,7 @@
 import { ArrowLeft, Check } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { cloudEnabled, startTrial, useCloud } from '../lib/cloud'
-import { FREE_HISTORY_DAYS, isPremium } from '../lib/cloud-core'
+import { FREE_HISTORY_DAYS, isPremium, redeemed } from '../lib/cloud-core'
 import { demoState } from '../lib/demo'
 import { num1, parseNum } from '../lib/format'
 import { KG_PER_LB, bodyweightRange, fromW, fw1, fwi, toW, unitSystem, wInt, wUnit } from '../lib/units'
@@ -21,7 +21,7 @@ import {
 import { PRESET_ROUTINES } from '../lib/presets'
 import { TRIAL_DAYS, detectCountry, formatPrice, priceFor } from '../lib/pricing'
 import { MAX_RANK_REPS, RP_PER_TIER, TIERS, kgForRp, rankFromRp, setRp } from '../lib/rank'
-import { actions } from '../lib/store'
+import { actions, getState } from '../lib/store'
 import { Emblem, Mark } from '../ui/Emblem'
 import { LineChart } from '../ui/charts'
 import { Seg, Stepper, toast } from '../ui/kit'
@@ -361,7 +361,7 @@ export function Onboarding() {
   /** Bu adım gösterilmeli mi: hesap ve Premium ekranları yalnızca anlamlıyken çıkar. */
   const shown = (s: StepId) => {
     if (s === 'save') return cloudEnabled && !cloud.user
-    if (s === 'premium') return !isPremium(cloud.sub)
+    if (s === 'premium') return !(isPremium(cloud.sub) || redeemed(getState().settings))
     return true
   }
 

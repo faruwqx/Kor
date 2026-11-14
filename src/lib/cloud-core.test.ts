@@ -4,6 +4,7 @@ import {
   mergeDocs,
   parseDoc,
   planSync,
+  redeemed,
   toDoc,
   type CloudDoc,
   type SyncMeta,
@@ -127,5 +128,18 @@ describe('isPremium', () => {
     expect(isPremium(sub('expired', '2026-12-12T12:00:00Z'), now)).toBe(false)
     expect(isPremium(sub('past_due', '2026-12-12T12:00:00Z'), now)).toBe(false)
     expect(isPremium(sub('active', 'bozuk'), now)).toBe(false)
+  })
+})
+
+describe('redeemed', () => {
+  it('doğru kod (büyük/küçük ve boşluk duyarsız) Premium açar', () => {
+    expect(redeemed({ redeem: '8888F' })).toBe(true)
+    expect(redeemed({ redeem: ' 8888f ' })).toBe(true)
+  })
+  it('yanlış ya da boş kod açmaz', () => {
+    expect(redeemed({ redeem: '0000' })).toBe(false)
+    expect(redeemed({ redeem: '' })).toBe(false)
+    expect(redeemed({})).toBe(false)
+    expect(redeemed(null)).toBe(false)
   })
 })
