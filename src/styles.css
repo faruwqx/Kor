@@ -105,6 +105,24 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+/* Native uygulama hissi: metin seçimi ve uzun-basma menüsü kapalı. */
+:root {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* Yazı yazılan ve okunan yerlerde seçime izin ver. */
+input,
+textarea,
+select,
+[contenteditable='true'],
+.legal {
+  -webkit-user-select: text;
+  user-select: text;
+  -webkit-touch-callout: default;
+}
+
 html {
   background: var(--ground);
   -webkit-text-size-adjust: 100%;
