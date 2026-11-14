@@ -122,8 +122,12 @@ export async function xlsxToTable(ab: ArrayBuffer): Promise<string[][]> {
   return rows
 }
 
-/** string[][] → CSV (gerekli hücreler tırnaklanır). */
+/**
+ * string[][] → sekmeyle ayrılmış metin (TSV). Sekme kullanılır çünkü Motra gibi bloklu
+ * dışa aktarımlar dikey yapıya dayanır ve importer sekmeyi bu biçim için bekler; düz
+ * tablolar da sekme ayracıyla sorunsuz okunur. Hücre içindeki sekme/satırsonu boşluğa çevrilir.
+ */
 export function tableToCsv(table: string[][]): string {
-  const cell = (v: string) => (/[",\n\r]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v)
-  return table.map((r) => r.map(cell).join(',')).join('\n')
+  const cell = (v: string) => v.replace(/[\t\r\n]+/g, ' ')
+  return table.map((r) => r.map(cell).join('\t')).join('\n')
 }
