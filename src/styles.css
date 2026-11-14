@@ -3117,6 +3117,18 @@ body {
   font-weight: 600;
 }
 
+.bodymap {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  padding: 6px 0 2px;
+}
+
+.bodymap__fig {
+  flex: 1;
+  max-width: 150px;
+}
+
 /* ---------- Hukuki metinler ---------- */
 
 .legal {
