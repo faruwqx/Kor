@@ -894,6 +894,8 @@ const d: Record<string, string> = {
   'Premium açıldı': 'Premium desbloqueado',
   'Kod geçersiz': 'Código no válido',
   'Tüm özellikler açık': 'Todas las funciones desbloqueadas',
+  'Koyu bölgeler bu aralıkta en çok çalıştığın yerler.':
+    'Las zonas más oscuras son las que más entrenaste en este rango.',
 }
 
 export default d

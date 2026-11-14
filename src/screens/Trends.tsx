@@ -20,6 +20,7 @@ import {
   type RangeDays,
 } from '../lib/trends'
 import { LineChart, Radar, VolumeBars } from '../ui/charts'
+import { BodyMap } from '../ui/BodyMap'
 import { Seg, Sheet } from '../ui/kit'
 import { t } from '../lib/i18n'
 
@@ -350,6 +351,19 @@ export function Trends() {
           { value: 'volume', label: t('Hacim') },
         ]}
       />
+      <div className="card">
+        <p className="note" style={{ marginBottom: 10 }}>
+          {t('Koyu bölgeler bu aralıkta en çok çalıştığın yerler.')}
+        </p>
+        <BodyMap
+          load={Object.fromEntries(
+            LOAD_GROUPS.map((g, i) => [
+              g.id,
+              data.groups[i][load] / Math.max(1, ...data.groups.map((x) => x[load])),
+            ]),
+          )}
+        />
+      </div>
       <div className="card">
         <Radar
           label={t('Kas gruplarına dağılım')}
