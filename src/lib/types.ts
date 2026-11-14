@@ -131,6 +131,8 @@ export interface Settings {
   /** Birim sistemi: metrik (kg, m) ya da imperial (lb, ft). Tanımsızsa metrik. */
   units?: 'metric' | 'imperial'
   lang?: 'tr' | 'en' | 'es'
+  /** Girilen Premium kodu (yerel kilit açma). */
+  redeem?: string
   /** Kurulumda kabul edilen hukuki metin sürümü ve zamanı. */
   legal?: { version: string; at: number }
 }

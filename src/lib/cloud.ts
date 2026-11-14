@@ -12,6 +12,7 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import { useSyncExternalStore } from 'react'
 import {
   isPremium,
+  redeemed,
   mergeDocs,
   parseDoc,
   planSync,
@@ -21,7 +22,7 @@ import {
   type SyncMeta,
 } from './cloud-core'
 import type { Plan, Price } from './pricing'
-import { actions, getState, onChange } from './store'
+import { actions, getState, onChange, useApp } from './store'
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string | undefined
 const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined
@@ -84,7 +85,7 @@ export function useCloud(): CloudState {
 }
 
 export function usePremium(): boolean {
-  return isPremium(useCloud().sub)
+  return isPremium(useCloud().sub) || redeemed(useApp().settings)
 }
 
 // ---------- Yerel kayıtlar ----------

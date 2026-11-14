@@ -128,3 +128,11 @@ export const FREE_HISTORY_DAYS = 30
 
 /** Ücretsiz planda program sayısı: dört hazır program ve iki özel program. */
 export const FREE_ROUTINES = 6
+
+/** Yerel Premium kilidini açan kod. Güvenlik sınırı değildir; kişisel kullanım içindir. */
+export const REDEEM_CODE = '8888F'
+
+/** Ayarlardaki kod geçerli mi (büyük/küçük ve boşluk duyarsız). */
+export function redeemed(settings: { redeem?: string } | null | undefined): boolean {
+  return (settings?.redeem ?? '').trim().toUpperCase() === REDEEM_CODE
+}
