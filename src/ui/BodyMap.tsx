@@ -22,26 +22,26 @@ type Region = { g: string; center?: boolean; e: E[] }
 
 // viewBox ön 426×748, arka 425×748. Merkez olmayan elipsler x'=W-cx ile aynalanır.
 const FRONT: Region[] = [
-  { g: 'traps', center: true, e: [[213, 200, 38, 15]] },
-  { g: 'shoulders', e: [[92, 236, 30, 34]] },
-  { g: 'chest', e: [[152, 252, 30, 26], [160, 290, 26, 20]] },
-  { g: 'biceps', e: [[72, 322, 22, 44]] },
-  { g: 'forearms', e: [[50, 430, 19, 42]] },
-  { g: 'abs', center: true, e: [[213, 312, 28, 18], [213, 352, 28, 18], [213, 394, 30, 24]] },
-  { g: 'obliques', e: [[160, 362, 15, 44]] },
-  { g: 'quads', e: [[168, 548, 33, 80]] },
-  { g: 'calves', e: [[158, 740, 24, 54]] },
+  { g: 'traps', center: true, e: [[213, 198, 46, 16]] },
+  { g: 'shoulders', e: [[90, 238, 34, 38]] },
+  { g: 'chest', e: [[150, 268, 40, 44]] },
+  { g: 'biceps', e: [[70, 330, 26, 52]] },
+  { g: 'forearms', e: [[48, 432, 22, 48]] },
+  { g: 'abs', center: true, e: [[213, 352, 40, 84]] },
+  { g: 'obliques', e: [[162, 360, 18, 52]] },
+  { g: 'quads', e: [[166, 548, 40, 92]] },
+  { g: 'calves', e: [[158, 735, 26, 58]] },
 ]
 const BACK: Region[] = [
-  { g: 'traps', center: true, e: [[213, 214, 52, 24], [213, 258, 32, 20]] },
-  { g: 'shoulders', e: [[92, 240, 30, 34]] },
-  { g: 'lats', e: [[152, 296, 38, 54]] },
-  { g: 'triceps', e: [[70, 322, 22, 44]] },
-  { g: 'forearms', e: [[47, 430, 19, 42]] },
-  { g: 'lowerback', center: true, e: [[213, 382, 28, 28]] },
-  { g: 'glutes', e: [[160, 442, 38, 38]] },
-  { g: 'hamstrings', e: [[165, 556, 33, 78]] },
-  { g: 'calves', e: [[158, 740, 24, 54]] },
+  { g: 'traps', center: true, e: [[213, 236, 60, 48]] },
+  { g: 'shoulders', e: [[90, 242, 34, 38]] },
+  { g: 'lats', e: [[150, 312, 44, 66]] },
+  { g: 'triceps', e: [[70, 330, 26, 52]] },
+  { g: 'forearms', e: [[47, 432, 22, 48]] },
+  { g: 'lowerback', center: true, e: [[213, 388, 34, 34]] },
+  { g: 'glutes', e: [[158, 446, 42, 44]] },
+  { g: 'hamstrings', e: [[165, 560, 40, 90]] },
+  { g: 'calves', e: [[158, 735, 26, 58]] },
 ]
 
 function Ellipses({ region, w }: { region: Region; w: number }) {
@@ -85,7 +85,7 @@ function Overlay({
         {regions.map((region) => {
           const active = selected === region.g
           const i = Math.max(0, Math.min(1, load[region.g] ?? 0))
-          const op = active ? 0.95 : i <= 0.001 ? 0 : 0.25 + i * 0.6
+          const op = active ? 0.95 : i <= 0.001 ? 0 : 0.4 + i * 0.5
           return (
             <g
               key={region.g}
