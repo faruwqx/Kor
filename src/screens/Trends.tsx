@@ -11,6 +11,7 @@ import {
   WEEKLY_AFTER_DAYS,
   exerciseCounts,
   muscleLoad,
+  regionLoad,
   presetFrom,
   rangeBuckets,
   spanDays,
@@ -153,6 +154,7 @@ export function Trends() {
       weekly: spanDays(from, to) > WEEKLY_AFTER_DAYS,
       sum: totals(inside, s.customExercises),
       groups: muscleLoad(inside, s.customExercises),
+      regions: regionLoad(inside, s.customExercises),
       top: exerciseCounts(inside),
       totalMs: inside.reduce((a, w) => a + Math.max(0, w.endedAt - w.startedAt), 0),
     }
@@ -356,12 +358,11 @@ export function Trends() {
           {t('Koyu bölgeler bu aralıkta en çok çalıştığın yerler.')}
         </p>
         <BodyMap
-          load={Object.fromEntries(
-            LOAD_GROUPS.map((g, i) => [
-              g.id,
-              data.groups[i][load] / Math.max(1, ...data.groups.map((x) => x[load])),
-            ]),
-          )}
+          load={(() => {
+            const r = data.regions
+            const max = Math.max(1, ...Object.values(r).map((x) => x[load]))
+            return Object.fromEntries(Object.entries(r).map(([k, v]) => [k, v[load] / max]))
+          })()}
         />
       </div>
       <div className="card">
