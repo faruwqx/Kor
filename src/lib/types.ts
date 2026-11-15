@@ -106,6 +106,12 @@ export interface Profile {
   sex: 'm' | 'f'
   weeklyGoal: number
   createdAt: number
+  /** Profil fotoğrafı (küçültülmüş JPEG data URL). */
+  photo?: string
+  /** Boy (cm). */
+  heightCm?: number
+  /** Yaş (yıl). */
+  age?: number
   /** Kurulum cevapları. Eski profillerde yoktur. */
   experience?: 'new' | 'mid' | 'adv'
   goal?: 'strength' | 'muscle' | 'fit' | 'rank'
