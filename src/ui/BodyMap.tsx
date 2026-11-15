@@ -1,9 +1,11 @@
 /**
  * Çalışılan bölgeleri gösteren anatomik vücut haritası: ön ve arka görünüm, her kas
- * ayrı çizilir ve o kası bu dönemde ne kadar çalıştığına göre soluk griden vurgu
- * rengine ("kor") doğru boyanır. Bir kasa dokununca o kasın tüm parçaları (sol+sağ,
- * ön+arka) birlikte seçilir; seçili bölge tam vurgu + konturla, diğerleri soluk
- * görünür. Seçimi Trends ekranı dinler ve altında bir bilgi kartı açar.
+ * ayrı path ve anatomik biçimde çizilir; sol taraf çizilip sağ taraf aynalanır. Kas,
+ * o bölgeyi bu dönemde ne kadar çalıştığına göre soluk kastan vurgu rengine ("kor")
+ * doğru boyanır. Bir kasa dokununca o kasın tüm parçaları (sol+sağ, ön+arka) seçilir;
+ * seçili bölge tam vurgu + kontur, diğerleri soluk. Ön başta yüz (Face) gösterilir.
+ *
+ * Path verisi tarayıcıda render edilip oran/simetri için düzeltildi (bkz. tmp/fig.html).
  */
 import { MCAT_NAME } from '../lib/motra'
 import { DEFAULT_FACE, FaceGlyph } from './Face'
@@ -23,56 +25,95 @@ function fill(load: BodyLoad, g: string): string {
   return `color-mix(in srgb, var(--accent) ${pct}%, var(--control))`
 }
 
-type P = { d: string; g?: string } // g yoksa nötr (baş, boyun, el)
+type P = { d: string; g?: string } // g yoksa nötr (baş, boyun, el, ayak)
 
-// viewBox 0 0 120 232, x=60 merkez.
+// Sol-yarı şekiller (merkez x=60'ta birleşir); her biri bir kez çizilir, bir kez aynalanır.
+// viewBox 0 0 120 244.
 const FRONT: P[] = [
-  { d: 'M60 8 a12 12 0 0 1 0 24 a12 12 0 0 1 0 -24 z' },
-  { d: 'M54 31 q6 4 12 0 l1 7 q-7 4 -14 0 z' },
-  { d: 'M54 38 q-10 0 -17 6 q10 2 18 -1 z', g: 'shoulders' },
-  { d: 'M66 38 q10 0 17 6 q-10 2 -18 -1 z', g: 'shoulders' },
-  { d: 'M37 44 q-10 1 -12 15 q9 4 15 -2 q2 -9 -3 -13 z', g: 'shoulders' },
-  { d: 'M83 44 q10 1 12 15 q-9 4 -15 -2 q-2 -9 3 -13 z', g: 'shoulders' },
-  { d: 'M58 42 q-17 0 -22 9 q-1 11 7 15 q12 3 15 -5 z', g: 'chest' },
-  { d: 'M62 42 q17 0 22 9 q1 11 -7 15 q-12 3 -15 -5 z', g: 'chest' },
-  { d: 'M50 64 q10 4 20 0 l-2 20 q-8 4 -16 0 z', g: 'abs' },
-  { d: 'M50 86 q10 4 20 0 l-3 22 q-7 4 -14 0 z', g: 'abs' },
-  { d: 'M48 66 q-5 16 1 38 l3 -2 q-3 -18 -1 -34 z', g: 'obliques' },
-  { d: 'M72 66 q5 16 -1 38 l-3 -2 q3 -18 1 -34 z', g: 'obliques' },
-  { d: 'M24 60 q-7 2 -7 15 l3 21 q6 2 9 -3 l-1 -30 q-2 -5 -4 -3 z', g: 'biceps' },
-  { d: 'M96 60 q7 2 7 15 l-3 21 q-6 2 -9 -3 l1 -30 q2 -5 4 -3 z', g: 'biceps' },
-  { d: 'M20 97 q-3 15 1 29 q5 2 8 -1 l1 -27 q-5 -3 -10 -1 z', g: 'forearms' },
-  { d: 'M100 97 q3 15 -1 29 q-5 2 -8 -1 l-1 -27 q5 -3 10 -1 z', g: 'forearms' },
-  { d: 'M20 127 q-2 8 3 12 q5 -1 6 -6 z' },
-  { d: 'M100 127 q2 8 -3 12 q-5 -1 -6 -6 z' },
-  { d: 'M47 110 q-8 2 -9 18 l5 40 q8 3 12 -2 l-1 -54 q-3 -4 -7 -2 z', g: 'quads' },
-  { d: 'M73 110 q8 2 9 18 l-5 40 q-8 3 -12 -2 l1 -54 q3 -4 7 -2 z', g: 'quads' },
-  { d: 'M45 170 q-3 22 1 44 q6 2 9 -1 l1 -42 q-6 -3 -11 -1 z', g: 'calves' },
-  { d: 'M75 170 q3 22 -1 44 q-6 2 -9 -1 l-1 -42 q6 -3 11 -1 z', g: 'calves' },
+  { d: 'M60 9 a11 11 0 0 1 0 22 a11 11 0 0 1 0 -22 z' },
+  { d: 'M55 30 q5 3 10 0 l1 7 q-6 4 -12 0 z' },
+  { d: 'M60 33 Q50 35 41 43 Q51 37 60 37 Z', g: 'traps' },
+  { d: 'M41 41 q-14 1 -17 16 q4 7 13 5 q8 -2 10 -10 q0 -8 -6 -11 z', g: 'shoulders' },
+  { d: 'M60 40 Q44 40 37 50 Q42 57 52 57 Q59 56 60 50 Z', g: 'chest' },
+  { d: 'M60 52 Q50 59 39 57 Q46 66 58 65 Q60 59 60 54 Z', g: 'chest' },
+  { d: 'M31 55 q-10 2 -11 16 l3 20 q7 2 11 -3 l-1 -30 q-1 -4 -2 -3 z', g: 'biceps' },
+  { d: 'M24 91 q-4 14 -1 28 q6 2 10 -1 l2 -26 q-6 -3 -11 -1 z', g: 'forearms' },
+  { d: 'M24 119 q-3 9 2 14 q7 -1 9 -7 z' },
+  { d: 'M49 58 q-6 11 -4 27 l5 -2 q-2 -14 2 -23 z', g: 'obliques' },
+  { d: 'M50 62 q8 2 10 0 l0 9 q-5 2 -10 0 z', g: 'abs' },
+  { d: 'M50 74 q8 2 10 0 l0 9 q-5 2 -10 0 z', g: 'abs' },
+  { d: 'M50 86 q8 2 10 0 l0 12 q-5 3 -10 1 z', g: 'abs' },
+  { d: 'M49 109 q-12 3 -11 21 l5 37 q7 2 11 -3 l-1 -52 q-2 -4 -4 -3 z', g: 'quads' },
+  { d: 'M60 111 q-8 2 -10 18 l3 41 q5 2 7 -1 l0 -56 z', g: 'quads' },
+  { d: 'M47 171 q-5 22 -1 45 q6 2 10 -1 l2 -43 q-6 -3 -12 -1 z', g: 'calves' },
+  { d: 'M47 217 q-4 8 0 14 l14 0 q1 -6 -3 -12 z' },
+]
+const BACK: P[] = [
+  { d: 'M60 9 a11 11 0 0 1 0 22 a11 11 0 0 1 0 -22 z' },
+  { d: 'M55 30 q5 3 10 0 l1 7 q-6 4 -12 0 z' },
+  { d: 'M60 8 Q48 9 46 18 Q54 11 60 12 Z' },
+  { d: 'M60 34 Q47 37 41 46 Q52 44 60 44 Z', g: 'traps' },
+  { d: 'M60 45 Q51 47 45 57 Q53 55 60 55 Z', g: 'traps' },
+  { d: 'M41 44 q-14 1 -17 16 q4 7 13 5 q8 -2 10 -10 q0 -8 -6 -11 z', g: 'shoulders' },
+  { d: 'M60 50 Q44 54 39 69 Q42 84 54 87 Q60 83 60 70 Z', g: 'lats' },
+  { d: 'M31 55 q-10 2 -11 16 l3 20 q7 2 11 -3 l-1 -30 q-1 -4 -2 -3 z', g: 'triceps' },
+  { d: 'M24 91 q-4 14 -1 28 q6 2 10 -1 l2 -26 q-6 -3 -11 -1 z', g: 'forearms' },
+  { d: 'M24 119 q-3 9 2 14 q7 -1 9 -7 z' },
+  { d: 'M51 88 q9 2 9 0 l0 18 q-5 2 -9 0 z', g: 'lowerback' },
+  { d: 'M60 107 Q45 107 42 121 Q45 134 60 134 Z', g: 'glutes' },
+  { d: 'M49 133 q-12 3 -10 19 l5 35 q7 2 11 -3 l-1 -48 q-2 -4 -5 -3 z', g: 'hamstrings' },
+  { d: 'M47 187 q-5 20 -1 41 q6 2 10 -1 l2 -39 q-6 -3 -12 -1 z', g: 'calves' },
+  { d: 'M47 228 q-4 6 0 10 l14 0 q1 -5 -3 -10 z' },
 ]
 
-const BACK: P[] = [
-  { d: 'M60 8 a12 12 0 0 1 0 24 a12 12 0 0 1 0 -24 z' },
-  { d: 'M54 31 q6 4 12 0 l1 7 q-7 4 -14 0 z' },
-  { d: 'M60 37 q-18 2 -24 9 q10 5 24 5 q14 0 24 -5 q-6 -7 -24 -9 z', g: 'traps' },
-  { d: 'M37 45 q-10 1 -12 15 q9 4 15 -2 q2 -9 -3 -13 z', g: 'shoulders' },
-  { d: 'M83 45 q10 1 12 15 q-9 4 -15 -2 q-2 -9 3 -13 z', g: 'shoulders' },
-  { d: 'M58 52 q-16 2 -20 14 q-1 14 8 22 q11 -2 13 -12 z', g: 'lats' },
-  { d: 'M62 52 q16 2 20 14 q1 14 -8 22 q-11 -2 -13 -12 z', g: 'lats' },
-  { d: 'M50 90 q10 4 20 0 l-3 18 q-7 4 -14 0 z', g: 'lowerback' },
-  { d: 'M24 60 q-7 2 -7 15 l3 21 q6 2 9 -3 l-1 -30 q-2 -5 -4 -3 z', g: 'triceps' },
-  { d: 'M96 60 q7 2 7 15 l-3 21 q-6 2 -9 -3 l1 -30 q2 -5 4 -3 z', g: 'triceps' },
-  { d: 'M20 97 q-3 15 1 29 q5 2 8 -1 l1 -27 q-5 -3 -10 -1 z', g: 'forearms' },
-  { d: 'M100 97 q3 15 -1 29 q-5 2 -8 -1 l-1 -27 q5 -3 10 -1 z', g: 'forearms' },
-  { d: 'M20 127 q-2 8 3 12 q5 -1 6 -6 z' },
-  { d: 'M100 127 q2 8 -3 12 q-5 -1 -6 -6 z' },
-  { d: 'M59 110 q-11 0 -14 10 q1 10 13 11 z', g: 'glutes' },
-  { d: 'M61 110 q11 0 14 10 q-1 10 -13 11 z', g: 'glutes' },
-  { d: 'M47 132 q-8 2 -9 16 l5 36 q8 3 12 -2 l-1 -48 q-3 -4 -7 -2 z', g: 'hamstrings' },
-  { d: 'M73 132 q8 2 9 16 l-5 36 q-8 3 -12 -2 l1 -48 q3 -4 7 -2 z', g: 'hamstrings' },
-  { d: 'M45 186 q-3 20 1 40 q6 2 9 -1 l1 -38 q-6 -3 -11 -1 z', g: 'calves' },
-  { d: 'M75 186 q3 20 -1 40 q-6 2 -9 -1 l-1 -38 q6 -3 11 -1 z', g: 'calves' },
-]
+function Muscle({
+  p,
+  load,
+  selected,
+  onSelect,
+  mirror,
+}: {
+  p: P
+  load: BodyLoad
+  selected?: string | null
+  onSelect?: (g: string | null) => void
+  mirror?: boolean
+}) {
+  const common = mirror ? { transform: 'translate(120,0) scale(-1,1)' } : {}
+  if (!p.g)
+    return (
+      <path
+        d={p.d}
+        fill="var(--raised)"
+        stroke="var(--ground)"
+        strokeWidth={1}
+        strokeLinejoin="round"
+        {...common}
+      />
+    )
+  const active = selected === p.g
+  const dim = !!selected && !active
+  return (
+    <path
+      d={p.d}
+      role="button"
+      tabIndex={0}
+      aria-label={regionName(p.g)}
+      aria-pressed={active}
+      fill={active ? 'var(--accent)' : fill(load, p.g)}
+      fillOpacity={dim ? 0.35 : 1}
+      stroke={active ? 'var(--ground)' : 'var(--sep, var(--ground))'}
+      strokeWidth={active ? 1.8 : 0.8}
+      strokeLinejoin="round"
+      style={{ cursor: 'pointer', pointerEvents: 'all' }}
+      onClick={(e) => {
+        e.stopPropagation()
+        onSelect?.(active ? null : p.g!)
+      }}
+      {...common}
+    />
+  )
+}
 
 function Figure({
   load,
@@ -88,44 +129,15 @@ function Figure({
   face?: FaceConfig | null
 }) {
   return (
-    <svg viewBox="0 0 120 232" width="100%" height="100%">
-      {parts.map((p, i) => {
-        if (!p.g)
-          return (
-            <path
-              key={i}
-              d={p.d}
-              fill="var(--raised)"
-              stroke="var(--ground)"
-              strokeWidth={1.2}
-              strokeLinejoin="round"
-            />
-          )
-        const active = selected === p.g
-        const dim = !!selected && !active
-        return (
-          <path
-            key={i}
-            d={p.d}
-            role="button"
-            tabIndex={0}
-            aria-label={regionName(p.g)}
-            aria-pressed={active}
-            fill={active ? 'var(--accent)' : fill(load, p.g)}
-            fillOpacity={dim ? 0.35 : 1}
-            stroke="var(--ground)"
-            strokeWidth={active ? 2.4 : 1.2}
-            strokeLinejoin="round"
-            style={{ cursor: 'pointer', pointerEvents: 'all' }}
-            onClick={(e) => {
-              e.stopPropagation()
-              onSelect?.(active ? null : p.g!)
-            }}
-          />
-        )
-      })}
+    <svg viewBox="0 0 120 244" width="100%" height="100%">
+      {parts.map((p, i) => (
+        <Muscle key={i} p={p} load={load} selected={selected} onSelect={onSelect} />
+      ))}
+      {parts.map((p, i) => (
+        <Muscle key={'m' + i} p={p} load={load} selected={selected} onSelect={onSelect} mirror />
+      ))}
       {face && (
-        <svg x="48" y="5" width="24" height="24" viewBox="0 0 40 40">
+        <svg x="48" y="7" width="24" height="24" viewBox="0 0 40 40">
           <FaceGlyph config={face} />
         </svg>
       )}
