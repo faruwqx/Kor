@@ -1230,20 +1230,18 @@ a.row:active {
   position: relative;
   width: 100%;
   max-width: 560px;
-  max-height: 92dvh;
+  max-height: calc(100dvh - env(safe-area-inset-top) - 24px);
   background: var(--surface);
   border-radius: 24px 24px 0 0;
-  padding: 20px var(--gutter) calc(env(safe-area-inset-bottom) + 20px);
+  padding: 20px var(--gutter) 0;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  overflow-y: auto;
+  overflow: hidden;
   animation: sheet 0.28s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
 .sheet--full {
-  height: 92dvh;
-  padding-bottom: 0;
+  height: calc(100dvh - env(safe-area-inset-top) - 24px);
   overflow: hidden;
 }
 
@@ -1258,6 +1256,20 @@ a.row:active {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  margin-bottom: 8px;
+}
+
+/* Kaydırılan gövde: sabit başlığın altında, parmakla rahat kayar. */
+.sheet__body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-bottom: calc(env(safe-area-inset-bottom) + 20px);
 }
 
 .sheet__scroll {

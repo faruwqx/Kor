@@ -1,5 +1,6 @@
 import { Minus, Plus } from 'lucide-react'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { createPortal } from 'react-dom'
 import { int } from '../lib/format'
 import type { Rank } from '../lib/rank'
 import { t } from '../lib/i18n'
@@ -29,15 +30,23 @@ export function Sheet({
     const prev = document.body.style.overflow
     document.body.style.overflow = 'hidden'
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && close.current()
+    // Klavye açılınca odaklanan giriş görünür kalsın.
+    const onFocus = (e: FocusEvent) => {
+      const el = e.target as HTMLElement | null
+      if (el && ref.current?.contains(el))
+        setTimeout(() => el.scrollIntoView({ block: 'center', behavior: 'smooth' }), 60)
+    }
     window.addEventListener('keydown', onKey)
+    window.addEventListener('focusin', onFocus)
     if (!ref.current?.contains(document.activeElement)) ref.current?.focus()
     return () => {
       document.body.style.overflow = prev
       window.removeEventListener('keydown', onKey)
+      window.removeEventListener('focusin', onFocus)
     }
   }, [])
-  return (
-    <div className="scrim" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
+  return createPortal(
+    <div className="scrim" onPointerDown={(e) => e.target === e.currentTarget && onClose()}>
       <div
         className={'sheet' + (full ? ' sheet--full' : '')}
         role="dialog"
@@ -53,9 +62,10 @@ export function Sheet({
             {action}
           </div>
         )}
-        {children}
+        {full ? children : <div className="sheet__body">{children}</div>}
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }
 
