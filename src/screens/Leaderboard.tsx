@@ -10,7 +10,7 @@ import {
 import { int } from '../lib/format'
 import { useBoard } from '../lib/hooks'
 import { SAMPLE_BOARD, placeBoard, type BoardEntry } from '../lib/leaderboard'
-import { PLACEMENT_GROUPS, rankFromRp } from '../lib/rank'
+import { rankFromRp } from '../lib/rank'
 import { back, go } from '../lib/router'
 import { actions, useApp } from '../lib/store'
 import { Emblem } from '../ui/Emblem'
@@ -65,7 +65,7 @@ export function Leaderboard() {
       ? t('{0} sporcu arasında {1}. sıradasın.', int(rows.length), mine.place)
       : t('Örnek listede {0}. sıraya denk geliyorsun.', mine.place)
   else if (myRp == null)
-    finding = t('Genel rank {0} kas grubu sıralanınca listeye girersin. Şu an {1} grup sıralandı.', PLACEMENT_GROUPS, board.rankedCount)
+    finding = t('Rank\'li bir hareket kaydet, listeye genel rank\'inle girersin.')
   else finding = t('Katılırsan genel rank\'inle listede görünürsün.')
 
   const join = async () => {
