@@ -896,6 +896,11 @@ const d: Record<string, string> = {
   'Tüm özellikler açık': 'All features unlocked',
   'Koyu bölgeler bu aralıkta en çok çalıştığın yerler.':
     'The darker areas are where you trained most in this range.',
+  Sabah: 'Morning',
+  Öğlen: 'Afternoon',
+  Akşam: 'Evening',
+  Gece: 'Night',
+  '{0} {1} {2} antrenmanı': '{0} {1} {2} workout',
 }
 
 export default d

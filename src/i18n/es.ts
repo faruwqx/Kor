@@ -896,6 +896,11 @@ const d: Record<string, string> = {
   'Tüm özellikler açık': 'Todas las funciones desbloqueadas',
   'Koyu bölgeler bu aralıkta en çok çalıştığın yerler.':
     'Las zonas más oscuras son las que más entrenaste en este rango.',
+  Sabah: 'Mañana',
+  Öğlen: 'Mediodía',
+  Akşam: 'Tarde',
+  Gece: 'Noche',
+  '{0} {1} {2} antrenmanı': '{0} {1} · {2}',
 }
 
 export default d

@@ -78,6 +78,8 @@ export interface Workout {
 
 export interface ActiveWorkout {
   name: string
+  /** Kullanıcı ya da program adlandırdıysa true; false ise bitişte otomatik ad verilir. */
+  named?: boolean
   startedAt: number
   routineId?: string
   exercises: WorkoutExercise[]

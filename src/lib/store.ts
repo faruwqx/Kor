@@ -4,6 +4,8 @@ import { LEGAL_VERSION } from './legal'
 import { PRESET_ROUTINES } from './presets'
 import { DEFAULT_REST_SEC, shiftRestEnd } from './rest'
 import { isWorkSet, lastSets } from './stats'
+import { findExercise, muscleName } from './exercises'
+import { locale, t } from './i18n'
 import type {
   AppState,
   Exercise,
@@ -99,6 +101,26 @@ function mapExercise(uidKey: string, fn: (we: WorkoutExercise) => WorkoutExercis
   )
 }
 
+/** Motra tarzı otomatik ad: "<Gün> <Zaman dilimi> <Baskın bölge> antrenmanı". */
+function autoWorkoutName(exercises: WorkoutExercise[], at: number): string {
+  const d = new Date(at)
+  const h = d.getHours()
+  const partKey = h < 11 ? 'Sabah' : h < 17 ? 'Öğlen' : h < 21 ? 'Akşam' : 'Gece'
+  const wd = new Intl.DateTimeFormat(locale(), { weekday: 'long' }).format(d)
+  const weekday = wd.charAt(0).toLocaleUpperCase(locale()) + wd.slice(1)
+  const tally = new Map<string, number>()
+  for (const we of exercises) {
+    const ex = findExercise(we.exerciseId, state.customExercises)
+    const n = we.sets.filter(isWorkSet).length
+    if (n) tally.set(ex.muscle, (tally.get(ex.muscle) ?? 0) + n)
+  }
+  let top: string | null = null
+  let max = 0
+  for (const [m, n] of tally) if (n > max) { max = n; top = m }
+  const region = top ? muscleName(top as never) : ''
+  return t('{0} {1} {2} antrenmanı', weekday, t(partKey), region).replace(/\s+/g, ' ').trim()
+}
+
 export const actions = {
   /** startRoutineId: önerilen program listenin başına alınır. */
   completeOnboarding(profile: Profile, bodyweight: number, startRoutineId?: string) {
@@ -134,6 +156,7 @@ export const actions = {
       ...s,
       active: {
         name: routine?.name ?? `${part} antrenmanı`,
+        named: !!routine,
         startedAt: Date.now(),
         routineId: routine?.id,
         exercises: (routine?.items ?? []).map((it) => ({
@@ -146,7 +169,7 @@ export const actions = {
   },
 
   renameActive(name: string) {
-    set((s) => (s.active ? { ...s, active: { ...s.active, name } } : s))
+    set((s) => (s.active ? { ...s, active: { ...s.active, name, named: true } } : s))
   },
 
   addExercises(ids: string[]) {
@@ -306,7 +329,7 @@ export const actions = {
     if (!exercises.some((we) => we.sets.some(isWorkSet))) return null
     const workout: Workout = {
       id: uid(),
-      name: a.name.trim() || 'Antrenman',
+      name: a.named ? a.name.trim() || 'Antrenman' : autoWorkoutName(exercises, a.startedAt),
       startedAt: a.startedAt,
       endedAt: Date.now(),
       bodyweight: currentBodyweight(),
