@@ -22,26 +22,26 @@ type Region = { g: string; center?: boolean; e: E[] }
 
 // viewBox ön 426×748, arka 425×748. Merkez olmayan elipsler x'=W-cx ile aynalanır.
 const FRONT: Region[] = [
-  { g: 'traps', center: true, e: [[213, 205, 40, 16]] },
-  { g: 'shoulders', e: [[95, 250, 34, 40]] },
-  { g: 'chest', e: [[150, 238, 34, 30], [158, 278, 30, 22]] },
-  { g: 'biceps', e: [[72, 335, 24, 46]] },
-  { g: 'forearms', e: [[48, 445, 20, 44]] },
-  { g: 'abs', center: true, e: [[213, 320, 30, 20], [213, 360, 30, 20], [213, 405, 32, 26]] },
-  { g: 'obliques', e: [[158, 372, 16, 46]] },
-  { g: 'quads', e: [[168, 560, 34, 80]] },
-  { g: 'calves', e: [[150, 700, 22, 40]] },
+  { g: 'traps', center: true, e: [[213, 200, 38, 15]] },
+  { g: 'shoulders', e: [[92, 236, 30, 34]] },
+  { g: 'chest', e: [[152, 252, 30, 26], [160, 290, 26, 20]] },
+  { g: 'biceps', e: [[72, 322, 22, 44]] },
+  { g: 'forearms', e: [[50, 430, 19, 42]] },
+  { g: 'abs', center: true, e: [[213, 312, 28, 18], [213, 352, 28, 18], [213, 394, 30, 24]] },
+  { g: 'obliques', e: [[160, 362, 15, 44]] },
+  { g: 'quads', e: [[168, 548, 33, 80]] },
+  { g: 'calves', e: [[158, 740, 24, 54]] },
 ]
 const BACK: Region[] = [
-  { g: 'traps', center: true, e: [[213, 222, 55, 26], [213, 265, 34, 22]] },
-  { g: 'shoulders', e: [[92, 252, 34, 40]] },
-  { g: 'lats', e: [[150, 300, 40, 56]] },
-  { g: 'triceps', e: [[70, 335, 24, 46]] },
-  { g: 'forearms', e: [[45, 445, 20, 44]] },
-  { g: 'lowerback', center: true, e: [[213, 390, 30, 30]] },
-  { g: 'glutes', e: [[160, 450, 40, 40]] },
-  { g: 'hamstrings', e: [[165, 560, 34, 78]] },
-  { g: 'calves', e: [[150, 700, 22, 40]] },
+  { g: 'traps', center: true, e: [[213, 214, 52, 24], [213, 258, 32, 20]] },
+  { g: 'shoulders', e: [[92, 240, 30, 34]] },
+  { g: 'lats', e: [[152, 296, 38, 54]] },
+  { g: 'triceps', e: [[70, 322, 22, 44]] },
+  { g: 'forearms', e: [[47, 430, 19, 42]] },
+  { g: 'lowerback', center: true, e: [[213, 382, 28, 28]] },
+  { g: 'glutes', e: [[160, 442, 38, 38]] },
+  { g: 'hamstrings', e: [[165, 556, 33, 78]] },
+  { g: 'calves', e: [[158, 740, 24, 54]] },
 ]
 
 function Ellipses({ region, w }: { region: Region; w: number }) {
@@ -76,7 +76,7 @@ function Overlay({
   return (
     <div className="bodyfig">
       <img src={img} alt="" />
-      <svg viewBox={`0 0 ${w} 748`} preserveAspectRatio="xMidYMin meet">
+      <svg viewBox={`0 0 ${w} 832`} preserveAspectRatio="xMidYMin meet">
         <defs>
           <filter id="mglow" x="-40%" y="-40%" width="180%" height="180%">
             <feGaussianBlur stdDeviation="5" />
