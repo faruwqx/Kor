@@ -3117,6 +3117,14 @@ body {
   font-weight: 600;
 }
 
+.libfilter {
+  margin: 10px 0 2px;
+}
+
+.libfilter select {
+  width: 100%;
+}
+
 .avatar--btn {
   padding: 0;
   border: 0;

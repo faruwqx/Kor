@@ -1,5 +1,6 @@
 import { exLabel } from '../i18n/exercises'
 import { lang, localize, localizeRecord } from './i18n'
+import { MOTRA_EXERCISES } from './motra'
 import type { Equipment, Exercise, MuscleId } from './types'
 import { fmtTarget } from './units'
 
@@ -600,6 +601,18 @@ export const BUILTIN: Exercise[] = [
     }),
   ),
 ]
+
+// Motra hareketlerini ekle, ama Kor'da zaten olan id/adları atla (Kor kazanır).
+{
+  const seenId = new Set(BUILTIN.map((e) => e.id))
+  const seenName = new Set(BUILTIN.map((e) => e.name))
+  for (const e of MOTRA_EXERCISES) {
+    if (seenId.has(e.id) || seenName.has(e.name)) continue
+    seenId.add(e.id)
+    seenName.add(e.name)
+    BUILTIN.push(e)
+  }
+}
 
 for (const e of BUILTIN) {
   const tr = e.name
