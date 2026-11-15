@@ -901,6 +901,13 @@ const d: Record<string, string> = {
   Akşam: 'Tarde',
   Gece: 'Noche',
   '{0} {1} {2} antrenmanı': '{0} {1} · {2}',
+  'Fotoğraf ekle': 'Añadir foto',
+  'Fotoğraf güncellendi': 'Foto actualizada',
+  'Fotoğraf çok büyük': 'La foto es demasiado grande',
+  'Boy (cm)': 'Altura (cm)',
+  Yaş: 'Edad',
+  'Ad, boy, yaş': 'Nombre, altura, edad',
+  '{0} yaş': '{0} años',
 }
 
 export default d

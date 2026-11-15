@@ -52,6 +52,30 @@ export function Profile() {
   const [reset, setReset] = useState(false)
   const [restore, setRestore] = useState<string | null>(null)
   const file = useRef<HTMLInputElement>(null)
+  const photoInput = useRef<HTMLInputElement>(null)
+  const pickPhoto = (f: File) => {
+    const img = new Image()
+    const url = URL.createObjectURL(f)
+    img.onload = () => {
+      URL.revokeObjectURL(url)
+      const size = 256
+      const c = document.createElement('canvas')
+      c.width = size
+      c.height = size
+      const ctx = c.getContext('2d')
+      if (!ctx) return
+      const m = Math.min(img.width, img.height)
+      ctx.drawImage(img, (img.width - m) / 2, (img.height - m) / 2, m, m, 0, 0, size, size)
+      try {
+        actions.updateProfile({ photo: c.toDataURL('image/jpeg', 0.82) })
+        toast(t('Fotoğraf güncellendi'))
+      } catch {
+        toast(t('Fotoğraf çok büyük'))
+      }
+    }
+    img.onerror = () => URL.revokeObjectURL(url)
+    img.src = url
+  }
 
   const totalVolume = s.workouts.reduce((a, w) => a + workoutVolume(w, s.customExercises), 0)
   const lastBw = s.bodyweights[s.bodyweights.length - 1]
@@ -131,9 +155,28 @@ export function Profile() {
 
       <section className="card pcard" aria-label={t('Profil özeti')}>
         <div className="pcard__top">
-          <div className="avatar" aria-hidden="true">
-            {(p.name.trim()[0] ?? 'K').toLocaleUpperCase('tr-TR')}
-          </div>
+          <button
+            className="avatar avatar--btn"
+            onClick={() => photoInput.current?.click()}
+            aria-label={t('Fotoğraf ekle')}
+          >
+            {p.photo ? (
+              <img src={p.photo} alt="" />
+            ) : (
+              (p.name.trim()[0] ?? 'K').toLocaleUpperCase('tr-TR')
+            )}
+          </button>
+          <input
+            ref={photoInput}
+            type="file"
+            accept="image/*"
+            hidden
+            onChange={(e) => {
+              const f = e.target.files?.[0]
+              e.target.value = ''
+              if (f) pickPhoto(f)
+            }}
+          />
           <div className="row__main">
             <div className="pcard__name">{p.name || t('Sporcu')}</div>
             <div className="row__sub" style={{ whiteSpace: 'normal' }}>
@@ -382,8 +425,16 @@ export function Profile() {
         </div>
         <button className="row" onClick={() => setNameSheet(true)}>
           <div className="row__main">
-            <div className="row__title">{t('Ad')}</div>
-            <div className="row__sub">{p.name || t('Girilmedi')}</div>
+            <div className="row__title">{t('Ad, boy, yaş')}</div>
+            <div className="row__sub">
+              {[
+                p.name || t('Girilmedi'),
+                p.heightCm ? `${p.heightCm} cm` : null,
+                p.age ? t('{0} yaş', p.age) : null,
+              ]
+                .filter(Boolean)
+                .join(' · ')}
+            </div>
           </div>
           <ChevronRight className="chev" />
         </button>
@@ -525,7 +576,7 @@ export function Profile() {
       </p>
 
       {weightSheet && <WeightSheet current={bw} onClose={() => setWeightSheet(false)} />}
-      {nameSheet && <NameSheet current={p.name} onClose={() => setNameSheet(false)} />}
+      {nameSheet && <NameSheet profile={p} onClose={() => setNameSheet(false)} />}
       {reset && (
         <Confirm
           title={t('Tüm veri silinsin mi?')}
@@ -598,18 +649,34 @@ export function WeightSheet({ current, onClose }: { current: number; onClose: ()
   )
 }
 
-function NameSheet({ current, onClose }: { current: string; onClose: () => void }) {
-  const [name, setName] = useState(current)
+function NameSheet({
+  profile,
+  onClose,
+}: {
+  profile: { name: string; heightCm?: number; age?: number }
+  onClose: () => void
+}) {
+  const [name, setName] = useState(profile.name)
+  const [height, setHeight] = useState(profile.heightCm ? String(profile.heightCm) : '')
+  const [age, setAge] = useState(profile.age ? String(profile.age) : '')
+  const onlyNum = (v: string) => v.replace(/[^0-9]/g, '')
   return (
-    <Sheet title={t('Ad')} onClose={onClose}>
+    <Sheet title={t('Profil')} onClose={onClose}>
       <form
         className="form"
         onSubmit={(e) => {
           e.preventDefault()
-          actions.updateProfile({ name: name.trim() })
+          const h = parseInt(height, 10)
+          const a = parseInt(age, 10)
+          actions.updateProfile({
+            name: name.trim(),
+            heightCm: Number.isFinite(h) && h > 0 ? h : undefined,
+            age: Number.isFinite(a) && a > 0 ? a : undefined,
+          })
           onClose()
         }}
       >
+        <label className="label">{t('Ad')}</label>
         <input
           className="input"
           value={name}
@@ -617,6 +684,26 @@ function NameSheet({ current, onClose }: { current: string; onClose: () => void 
           aria-label={t('Ad')}
           maxLength={24}
           autoFocus
+        />
+        <label className="label">{t('Boy (cm)')}</label>
+        <input
+          className="input"
+          value={height}
+          onChange={(e) => setHeight(onlyNum(e.target.value))}
+          inputMode="numeric"
+          maxLength={3}
+          aria-label={t('Boy (cm)')}
+          placeholder="175"
+        />
+        <label className="label">{t('Yaş')}</label>
+        <input
+          className="input"
+          value={age}
+          onChange={(e) => setAge(onlyNum(e.target.value))}
+          inputMode="numeric"
+          maxLength={3}
+          aria-label={t('Yaş')}
+          placeholder="25"
         />
         <div className="btnrow">
           <button type="button" className="btn btn--ghost" onClick={onClose}>
