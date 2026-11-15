@@ -6,6 +6,8 @@
  * görünür. Seçimi Trends ekranı dinler ve altında bir bilgi kartı açar.
  */
 import { MCAT_NAME } from '../lib/motra'
+import { DEFAULT_FACE, FaceGlyph } from './Face'
+import type { FaceConfig } from '../lib/types'
 
 /** İnce kas kimliği → 0..1 yoğunluk. */
 export type BodyLoad = Record<string, number>
@@ -77,11 +79,13 @@ function Figure({
   parts,
   selected,
   onSelect,
+  face,
 }: {
   load: BodyLoad
   parts: P[]
   selected?: string | null
   onSelect?: (g: string | null) => void
+  face?: FaceConfig | null
 }) {
   return (
     <svg viewBox="0 0 120 232" width="100%" height="100%">
@@ -120,6 +124,11 @@ function Figure({
           />
         )
       })}
+      {face && (
+        <svg x="48" y="5" width="24" height="24" viewBox="0 0 40 40">
+          <FaceGlyph config={face} />
+        </svg>
+      )}
     </svg>
   )
 }
@@ -128,15 +137,17 @@ export function BodyMap({
   load,
   selected,
   onSelect,
+  face,
 }: {
   load: BodyLoad
   selected?: string | null
   onSelect?: (g: string | null) => void
+  face?: FaceConfig
 }) {
   return (
     <div className="bodymap" onClick={() => onSelect?.(null)}>
       <div className="bodymap__fig">
-        <Figure load={load} parts={FRONT} selected={selected} onSelect={onSelect} />
+        <Figure load={load} parts={FRONT} selected={selected} onSelect={onSelect} face={face ?? DEFAULT_FACE} />
       </div>
       <div className="bodymap__fig">
         <Figure load={load} parts={BACK} selected={selected} onSelect={onSelect} />

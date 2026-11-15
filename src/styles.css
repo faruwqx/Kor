@@ -3147,6 +3147,52 @@ body {
   opacity: 0.55;
 }
 
+.avatar svg {
+  width: 100%;
+  height: 100%;
+}
+
+.facewrap {
+  display: flex;
+  justify-content: center;
+  margin: 2px 0 16px;
+}
+
+.facewrap svg {
+  width: 120px;
+  height: 120px;
+  background: var(--control);
+  border-radius: 50%;
+}
+
+.facefield {
+  margin: 12px 0;
+}
+
+.facefield .label {
+  margin-bottom: 6px;
+}
+
+.swatches {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.swatch {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--ground);
+  padding: 0;
+  cursor: pointer;
+}
+
+.swatch[aria-pressed='true'] {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 .regioncard {
   margin-top: 12px;
   padding-top: 12px;

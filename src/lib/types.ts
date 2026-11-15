@@ -105,6 +105,14 @@ export interface Routine {
   items: RoutineItem[]
 }
 
+export interface FaceConfig {
+  skin: string
+  hair: string
+  hairColor: string
+  eyes: string
+  mouth: string
+}
+
 export interface Profile {
   name: string
   sex: 'm' | 'f'
@@ -116,6 +124,8 @@ export interface Profile {
   heightCm?: number
   /** Yaş (yıl). */
   age?: number
+  /** Avatar yüzü (fotoğraf yoksa gösterilir). */
+  face?: FaceConfig
   /** Kurulum cevapları. Eski profillerde yoktur. */
   experience?: 'new' | 'mid' | 'adv'
   goal?: 'strength' | 'muscle' | 'fit' | 'rank'
