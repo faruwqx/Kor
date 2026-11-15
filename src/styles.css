@@ -3140,6 +3140,13 @@ body {
   display: block;
 }
 
+.chart__guide {
+  stroke: var(--accent);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+  opacity: 0.55;
+}
+
 .regioncard {
   margin-top: 12px;
   padding-top: 12px;
