@@ -13,7 +13,7 @@ import {
 import { int, relDay, relDayLower, shortDate, timer } from '../lib/format'
 import { fw1, fwi, toW, wNum1, wUnit } from '../lib/units'
 import { useBoard } from '../lib/hooks'
-import { RP_PER_TIER, TIERS, kgAtReps, kgForRp, rankFromRp } from '../lib/rank'
+import { RP_PER_TIER, TIERS, kgAtReps, kgForRp, personalRank, rankFromRp } from '../lib/rank'
 import { back, go } from '../lib/router'
 import { exerciseSessions } from '../lib/stats'
 import { currentBodyweight, useApp } from '../lib/store'
@@ -97,6 +97,8 @@ export function ExerciseDetail({ id }: { id: string }) {
   )
   const lift = board.lifts.get(id)
   const rank = lift ? rankFromRp(lift.rp) : null
+  // Ortak standardı olmayan, süreli olmayan hareketler için kişisel rank.
+  const pr = !ex.std && !ex.timed ? personalRank(s.workouts, id) : null
   const best = sessions.length ? Math.max(...sessions.map((x) => x.e1rm)) : 0
   const heaviest = sessions.length ? Math.max(...sessions.map((x) => x.topKg)) : 0
   const first = sessions[0]
@@ -204,11 +206,33 @@ export function ExerciseDetail({ id }: { id: string }) {
           </div>
           {rank && <RankBar rank={rank} />}
         </section>
+      ) : ex.timed ? (
+        <p className="note">
+          {t('Bu hareket süreyle kaydedilir{0} ve rank\'e sayılmaz. {1} süren rekorun olur.', ex.target ? t(' (yarış standardı {0})', ex.target) : '', ex.longer ? t('En uzun') : t('En kısa'))}
+        </p>
+      ) : pr ? (
+        <section
+          className="card card--tint"
+          style={{ ['--tint' as string]: pr.rank.color }}
+          aria-label={t('Hareket rank\'i')}
+        >
+          <div className="rankhero" style={{ marginBottom: 16 }}>
+            <Emblem rank={pr.rank} size={64} />
+            <div className="rankhero__body">
+              <div className="fig rankhero__label">{t('{0} · Kişisel', pr.rank.label)}</div>
+              <div className="rankhero__rp num">
+                {t('En iyi set {0} × {1}', loadText(ex, pr.bestSet.kg), pr.bestSet.reps)}
+              </div>
+            </div>
+          </div>
+          <RankBar rank={pr.rank} />
+          <p className="note" style={{ marginTop: 12 }}>
+            {t('Kişisel rank: bu harekette kendi ilerlemene göre. Ortak standart gelince herkese açık rank olur.')}
+          </p>
+        </section>
       ) : (
         <p className="note">
-          {ex.timed
-            ? t('Bu hareket süreyle kaydedilir{0} ve rank\'e sayılmaz. {1} süren rekorun olur.', ex.target ? t(' (yarış standardı {0})', ex.target) : '', ex.longer ? t('En uzun') : t('En kısa'))
-            : t('Bu hareket rank\'e sayılmaz: ortak bir standardı yok. Setlerin, hacmin ve rekorların yine kaydedilir.')}
+          {t('Bu harekette kişisel rank için en az bir çalışma seti kaydet.')}
         </p>
       )}
 

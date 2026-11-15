@@ -248,3 +248,47 @@ export function rankBoard(
       : null
   return { muscles, rankedCount: ranked.length, overall, lifts }
 }
+
+export interface PersonalRank {
+  rank: Rank
+  firstE1rm: number
+  bestE1rm: number
+  bestSet: { kg: number; reps: number }
+}
+
+/**
+ * Ortak standardı olmayan hareketler için kişisel rank: kişinin kendi ilerlemesine
+ * dayanır. İlk çalışma setinin tahmini 1TM'sine göre en iyinin oranı; ikiye katlamak
+ * Kor eşiğine çıkarır. Tek set / ilerleme yoksa merdivenin dibindedir ve PR'larla yükselir.
+ */
+export function personalRank(workouts: Workout[], exId: string): PersonalRank | null {
+  let firstE1rm = 0
+  let firstAt = Infinity
+  let bestE1rm = 0
+  let bestSet: { kg: number; reps: number } | null = null
+  for (const w of workouts) {
+    for (const we of w.exercises) {
+      if (we.exerciseId !== exId) continue
+      for (const s of we.sets) {
+        if (!s.done || s.warmup || s.kg == null || s.reps == null) continue
+        if (s.reps < 1 || s.reps > MAX_RANK_REPS) continue
+        const v = e1rm(s.kg, s.reps)
+        if (v <= 0) continue
+        if (w.endedAt < firstAt || (w.endedAt === firstAt && v > firstE1rm)) {
+          firstAt = w.endedAt
+          firstE1rm = v
+        }
+        if (v > bestE1rm) {
+          bestE1rm = v
+          bestSet = { kg: s.kg, reps: s.reps }
+        }
+      }
+    }
+  }
+  if (!bestSet || firstE1rm <= 0) return null
+  const improve = Math.max(0, bestE1rm / firstE1rm - 1)
+  const score = Math.min(1, improve)
+  const rp = Math.round(Math.pow(score, RANK_CURVE) * KOR_RP)
+  return { rank: rankFromRp(rp), firstE1rm, bestE1rm, bestSet }
+}
+
