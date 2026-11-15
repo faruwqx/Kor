@@ -368,7 +368,6 @@ export function Trends() {
           })()}
           selected={region}
           onSelect={setRegion}
-          face={s.profile?.face}
         />
         {region &&
           (() => {

@@ -27,7 +27,6 @@ import { streak, workoutVolume } from '../lib/stats'
 import { actions, currentBodyweight, getState, parseBackup, useApp } from '../lib/store'
 import { LineChart } from '../ui/charts'
 import { Confirm, Seg, Sheet, Stepper, Switch, toast } from '../ui/kit'
-import { DEFAULT_FACE, EYES, Face, HAIRS, HAIR_COLORS, MOUTHS, SKINS } from '../ui/Face'
 import { LANGS, lang } from '../lib/i18n'
 import { AccountSection } from './Account'
 import { t } from '../lib/i18n'
@@ -49,7 +48,6 @@ export function Profile() {
   const bw = currentBodyweight(s)
   const [weightSheet, setWeightSheet] = useState(false)
   const [nameSheet, setNameSheet] = useState(false)
-  const [charSheet, setCharSheet] = useState(false)
   const [reset, setReset] = useState(false)
   const [restore, setRestore] = useState<string | null>(null)
   const file = useRef<HTMLInputElement>(null)
@@ -161,7 +159,7 @@ export function Profile() {
             onClick={() => photoInput.current?.click()}
             aria-label={t('Fotoğraf ekle')}
           >
-            {p.photo ? <img src={p.photo} alt="" /> : <Face config={p.face} />}
+            {p.photo ? <img src={p.photo} alt="" /> : <img src={`${import.meta.env.BASE_URL}body/body-head.webp`} alt="" />}
           </button>
           <input
             ref={photoInput}
@@ -433,14 +431,6 @@ export function Profile() {
           </div>
           <ChevronRight className="chev" />
         </button>
-        <button className="row" onClick={() => setCharSheet(true)}>
-          <div className="row__main">
-            <div className="row__title">{t('Karakterim')}</div>
-            <div className="row__sub">{t('Avatar yüzünü özelleştir')}</div>
-          </div>
-          <Face config={p.face} size={30} />
-          <ChevronRight className="chev" />
-        </button>
       </div>
 
       <div className="section">
@@ -580,7 +570,6 @@ export function Profile() {
 
       {weightSheet && <WeightSheet current={bw} onClose={() => setWeightSheet(false)} />}
       {nameSheet && <NameSheet profile={p} onClose={() => setNameSheet(false)} />}
-      {charSheet && <CharacterSheet profile={p} onClose={() => setCharSheet(false)} />}
       {reset && (
         <Confirm
           title={t('Tüm veri silinsin mi?')}
@@ -649,107 +638,6 @@ export function WeightSheet({ current, onClose }: { current: number; onClose: ()
           </button>
         </div>
       </form>
-    </Sheet>
-  )
-}
-
-
-const HAIR_NAME: Record<string, string> = {
-  short: 'Kısa',
-  buzz: 'Tıraş',
-  curly: 'Kıvırcık',
-  bun: 'Topuz',
-  none: 'Yok',
-}
-const EYE_NAME: Record<string, string> = { round: 'Yuvarlak', happy: 'Mutlu', sleepy: 'Dalgın' }
-const MOUTH_NAME: Record<string, string> = { smile: 'Gülümseme', grin: 'Sırıtış', neutral: 'Düz' }
-
-function CharacterSheet({
-  profile,
-  onClose,
-}: {
-  profile: { photo?: string; face?: import('../lib/types').FaceConfig }
-  onClose: () => void
-}) {
-  const f = { ...DEFAULT_FACE, ...profile.face }
-  const set = (patch: Partial<typeof f>) => actions.updateProfile({ face: { ...f, ...patch } })
-  return (
-    <Sheet title={t('Karakterim')} onClose={onClose}>
-      <div className="facewrap">
-        <Face config={f} size={120} />
-      </div>
-      <div className="facefield">
-        <div className="label">{t('Deri')}</div>
-        <div className="swatches">
-          {SKINS.map((s) => (
-            <button
-              key={s.id}
-              type="button"
-              className="swatch"
-              aria-pressed={f.skin === s.id}
-              aria-label={t('Deri')}
-              style={{ background: s.color }}
-              onClick={() => set({ skin: s.id })}
-            />
-          ))}
-        </div>
-      </div>
-      <div className="facefield">
-        <div className="label">{t('Saç rengi')}</div>
-        <div className="swatches">
-          {HAIR_COLORS.map((h) => (
-            <button
-              key={h.id}
-              type="button"
-              className="swatch"
-              aria-pressed={f.hairColor === h.id}
-              aria-label={t('Saç rengi')}
-              style={{ background: h.color }}
-              onClick={() => set({ hairColor: h.id })}
-            />
-          ))}
-        </div>
-      </div>
-      <div className="facefield">
-        <div className="label">{t('Saç')}</div>
-        <div className="chips">
-          {HAIRS.map((h) => (
-            <button key={h} type="button" className="chip" aria-pressed={f.hair === h} onClick={() => set({ hair: h })}>
-              {t(HAIR_NAME[h])}
-            </button>
-          ))}
-        </div>
-      </div>
-      <div className="facefield">
-        <div className="label">{t('Gözler')}</div>
-        <div className="chips">
-          {EYES.map((e) => (
-            <button key={e} type="button" className="chip" aria-pressed={f.eyes === e} onClick={() => set({ eyes: e })}>
-              {t(EYE_NAME[e])}
-            </button>
-          ))}
-        </div>
-      </div>
-      <div className="facefield">
-        <div className="label">{t('Ağız')}</div>
-        <div className="chips">
-          {MOUTHS.map((m) => (
-            <button key={m} type="button" className="chip" aria-pressed={f.mouth === m} onClick={() => set({ mouth: m })}>
-              {t(MOUTH_NAME[m])}
-            </button>
-          ))}
-        </div>
-      </div>
-      {profile.photo && (
-        <button
-          type="button"
-          className="btn btn--ghost btn--block"
-          style={{ marginTop: 14 }}
-          onClick={() => actions.updateProfile({ photo: undefined })}
-        >
-          {t('Fotoğrafı kaldır')}
-        </button>
-      )}
     </Sheet>
   )
 }
