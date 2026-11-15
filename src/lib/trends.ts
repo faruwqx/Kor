@@ -5,7 +5,7 @@
 import { findExercise } from './exercises'
 import { localize } from './i18n'
 import { addDays, startOfDay, weekStart } from './format'
-import { exerciseVolume, isWorkSet } from './stats'
+import { exerciseVolume, isWorkSet, workoutPRs } from './stats'
 import type { Exercise, MuscleId, Workout } from './types'
 
 export type RangeDays = 7 | 30 | 90
@@ -178,6 +178,34 @@ export function regionLoad(
   }
   return out as Record<string, Record<LoadMetric, number>>
 }
+
+export interface RegionPR {
+  exerciseId: string
+  name: string
+  kg: number
+  reps: number
+  at: number
+}
+
+/** Bir bölgeyi (ince kas) çalıştıran hareketlerde en son kırılan rekor. Tüm geçmişe bakar. */
+export function lastRegionPR(
+  workouts: Workout[],
+  custom: Exercise[],
+  region: string,
+): RegionPR | null {
+  const sorted = [...workouts].sort((a, b) => a.endedAt - b.endedAt)
+  let best: RegionPR | null = null
+  for (const w of sorted) {
+    for (const pr of workoutPRs(w, workouts, custom)) {
+      const ex = findExercise(pr.exerciseId, custom)
+      const cats = ex.cats?.length ? ex.cats : [MUSCLE2FINE[ex.muscle]]
+      if (!cats.includes(region)) continue
+      best = { exerciseId: ex.id, name: ex.name, kg: pr.kg, reps: pr.reps, at: w.endedAt }
+    }
+  }
+  return best
+}
+
 
 /** Aralıkta yapılan hareketler, set sayısına göre çoktan aza. */
 export function exerciseCounts(workouts: Workout[]): { id: string; sets: number }[] {

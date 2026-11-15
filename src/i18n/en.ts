@@ -925,6 +925,11 @@ const d: Record<string, string> = {
   'Genel rankını başlat': 'Start your overall rank',
   'Rank\'li bir hareket kaydet, listeye genel rank\'inle girersin.': 'Log a ranked move to appear on the board with your overall rank.',
   'En az iki tartım gir, değişimin burada çizilsin.': 'Log at least two weigh-ins to chart your change.',
+  'Koyu bölge en çok çalıştığın yer. Bir bölgeye dokun: hacim, set ve son PR.': 'Darker is where you trained most. Tap a region for volume, sets and last PR.',
+  '{0} · {1} set · {2} tekrar': '{0} · {1} sets · {2} reps',
+  'Bu aralıkta çalışmadın': 'You didn’t train this in this range',
+  'Son PR: {0} {1} × {2} · {3}': 'Last PR: {0} {1} × {2} · {3}',
+  'Bu bölgede henüz PR yok': 'No PR here yet',
 }
 
 export default d
