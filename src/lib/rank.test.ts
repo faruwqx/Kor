@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { demoState } from './demo'
 import { findExercise } from './exercises'
 import { weekStart } from './format'
-import { KOR_RP, e1rm, kgAtReps, kgForRp, rankBoard, rankFromRp, setRp } from './rank'
+import { KOR_RP, e1rm, kgAtReps, kgForRp, personalRank, rankBoard, rankFromRp, setRp } from './rank'
 import { streak, workoutPRs, workoutVolume } from './stats'
 import type { Workout } from './types'
 
@@ -170,5 +170,33 @@ describe('örnek veri', () => {
     )
     for (const m of board.muscles)
       console.log(` ${m.muscle}: ${m.rank?.label} ${m.rank?.rp} (${m.lift?.exerciseId} ${m.lift?.kg}x${m.lift?.reps})`)
+  })
+})
+
+describe('personalRank', () => {
+  const mk = (exId: string, rows: [number, number, number][]): Workout[] =>
+    rows.map(([kg, reps, at], i) => ({
+      id: 'w' + i,
+      name: 'x',
+      startedAt: at,
+      endedAt: at,
+      bodyweight: 80,
+      exercises: [{ exerciseId: exId, sets: [{ done: true, kg, reps }] }],
+    })) as unknown as Workout[]
+
+  it('ilerleme arttıkça kişisel rp yükselir, tek set dipten başlar', () => {
+    const low = personalRank(mk('cx', [[50, 5, 1]]), 'cx')!
+    const high = personalRank(mk('cx', [[50, 5, 1], [100, 5, 2]]), 'cx')!
+    expect(low.rank.rp).toBe(0)
+    expect(high.rank.rp).toBeGreaterThan(low.rank.rp)
+  })
+
+  it('e1rm iki katına çıkınca Kor eşiğine ulaşır', () => {
+    const pr = personalRank(mk('cx', [[50, 1, 1], [100, 1, 2]]), 'cx')!
+    expect(pr.rank.rp).toBe(KOR_RP)
+  })
+
+  it('veri yoksa null döner', () => {
+    expect(personalRank([], 'cx')).toBeNull()
   })
 })

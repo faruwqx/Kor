@@ -908,6 +908,11 @@ const d: Record<string, string> = {
   Yaş: 'Age',
   'Ad, boy, yaş': 'Name, height, age',
   '{0} yaş': '{0} y/o',
+  '{0} · Kişisel': '{0} · Personal',
+  'Kişisel rank: bu harekette kendi ilerlemene göre. Ortak standart gelince herkese açık rank olur.':
+    'Personal rank: based on your own progress on this move. It becomes a public rank once a shared standard arrives.',
+  'Bu harekette kişisel rank için en az bir çalışma seti kaydet.':
+    'Log at least one working set to get a personal rank on this move.',
 }
 
 export default d
