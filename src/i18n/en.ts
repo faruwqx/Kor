@@ -930,6 +930,7 @@ const d: Record<string, string> = {
   'Bu aralıkta çalışmadın': 'You didn’t train this in this range',
   'Son PR: {0} {1} × {2} · {3}': 'Last PR: {0} {1} × {2} · {3}',
   'Bu bölgede henüz PR yok': 'No PR here yet',
+  '{0} · {1} antrenman': '{0} · {1} workouts',
 }
 
 export default d
