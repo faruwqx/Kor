@@ -1,8 +1,8 @@
 import { ChevronRight, Dumbbell, Layers, Repeat, Search, Timer, Weight } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { findExercise } from '../lib/exercises'
-import { addDays, dayMonth, duration, int, startOfDay } from '../lib/format'
-import { fwi, toW, wBig, wNum1, wUnit } from '../lib/units'
+import { addDays, dayMonth, duration, int, relDay, startOfDay } from '../lib/format'
+import { fw1, fwi, toW, wBig, wNum1, wUnit } from '../lib/units'
 import { go } from '../lib/router'
 import { currentBodyweight, useApp } from '../lib/store'
 import { WeightSheet } from './Profile'
@@ -10,6 +10,7 @@ import {
   LOAD_GROUPS,
   WEEKLY_AFTER_DAYS,
   exerciseCounts,
+  lastRegionPR,
   muscleLoad,
   regionLoad,
   presetFrom,
@@ -22,6 +23,7 @@ import {
 } from '../lib/trends'
 import { LineChart, Radar, VolumeBars } from '../ui/charts'
 import { BodyMap } from '../ui/BodyMap'
+import { MCAT_NAME } from '../lib/motra'
 import { Seg, Sheet } from '../ui/kit'
 import { t } from '../lib/i18n'
 
@@ -141,6 +143,7 @@ export function Trends() {
   const [weighing, setWeighing] = useState(false)
   const [metric, setMetric] = useState<Metric>('time')
   const [load, setLoad] = useState<LoadMetric>('reps')
+  const [region, setRegion] = useState<string | null>(null)
 
   const from = range.kind === 'preset' ? presetFrom(range.days, today) : range.from
   const to = range.kind === 'preset' ? today : range.to
@@ -355,7 +358,7 @@ export function Trends() {
       />
       <div className="card">
         <p className="note" style={{ marginBottom: 10 }}>
-          {t('Koyu bölgeler bu aralıkta en çok çalıştığın yerler.')}
+          {t('Koyu bölge en çok çalıştığın yer. Bir bölgeye dokun: hacim, set ve son PR.')}
         </p>
         <BodyMap
           load={(() => {
@@ -363,7 +366,29 @@ export function Trends() {
             const max = Math.max(1, ...Object.values(r).map((x) => x[load]))
             return Object.fromEntries(Object.entries(r).map(([k, v]) => [k, v[load] / max]))
           })()}
+          selected={region}
+          onSelect={setRegion}
         />
+        {region &&
+          (() => {
+            const v = data.regions[region]
+            const pr = lastRegionPR(s.workouts, s.customExercises, region)
+            return (
+              <div className="regioncard">
+                <div className="regioncard__name">{MCAT_NAME[region] ?? region}</div>
+                <div className="row__sub">
+                  {v
+                    ? t('{0} · {1} set · {2} tekrar', fwi(v.volume), int(v.sets), int(v.reps))
+                    : t('Bu aralıkta çalışmadın')}
+                </div>
+                <div className="note" style={{ marginTop: 6 }}>
+                  {pr
+                    ? t('Son PR: {0} {1} × {2} · {3}', pr.name, fw1(pr.kg), pr.reps, relDay(pr.at))
+                    : t('Bu bölgede henüz PR yok')}
+                </div>
+              </div>
+            )
+          })()}
       </div>
       <div className="card">
         <Radar

@@ -4,6 +4,7 @@ import {
   LOAD_GROUPS,
   buckets,
   exerciseCounts,
+  lastRegionPR,
   muscleLoad,
   rangeBuckets,
   spanDays,
@@ -31,6 +32,31 @@ const ws = [
   workout('b', NOW - 1 * DAY, 'curl', [12]),
   workout('c', NOW - 40 * DAY, 'squat', [5]),
 ]
+
+describe('lastRegionPR', () => {
+  it('bölgedeki en son rekoru döner', () => {
+    const prws = [
+      workout('p1', NOW - 5 * DAY, 'bench', [5]),
+      workout('p2', NOW - 1 * DAY, 'bench', [10]),
+    ]
+    const pr = lastRegionPR(prws, [], 'chest')
+    expect(pr).not.toBeNull()
+    expect(pr!.exerciseId).toBe('bench')
+    expect(pr!.reps).toBe(10)
+    expect(pr!.at).toBe(NOW - 1 * DAY)
+  })
+  it('o bölgede hareket yoksa null', () => {
+    const prws = [
+      workout('p1', NOW - 5 * DAY, 'bench', [5]),
+      workout('p2', NOW - 1 * DAY, 'bench', [10]),
+    ]
+    expect(lastRegionPR(prws, [], 'calves')).toBeNull()
+  })
+  it('tek kayıtta rekor yok (kıyas geçmişi yok)', () => {
+    const one = [workout('p1', NOW - 1 * DAY, 'bench', [10])]
+    expect(lastRegionPR(one, [], 'chest')).toBeNull()
+  })
+})
 
 describe('trendler', () => {
   it('toplamlar: süre, set, tekrar ve hacim', () => {

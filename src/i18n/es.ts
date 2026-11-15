@@ -925,6 +925,11 @@ const d: Record<string, string> = {
   'Genel rankını başlat': 'Inicia tu rango general',
   'Rank\'li bir hareket kaydet, listeye genel rank\'inle girersin.': 'Registra un ejercicio con rango para aparecer en la tabla con tu rango general.',
   'En az iki tartım gir, değişimin burada çizilsin.': 'Registra al menos dos pesajes para ver tu cambio.',
+  'Koyu bölge en çok çalıştığın yer. Bir bölgeye dokun: hacim, set ve son PR.': 'Más oscuro es donde más entrenaste. Toca una zona para ver volumen, series y último PR.',
+  '{0} · {1} set · {2} tekrar': '{0} · {1} series · {2} reps',
+  'Bu aralıkta çalışmadın': 'No lo entrenaste en este rango',
+  'Son PR: {0} {1} × {2} · {3}': 'Último PR: {0} {1} × {2} · {3}',
+  'Bu bölgede henüz PR yok': 'Aún no hay PR aquí',
 }
 
 export default d
