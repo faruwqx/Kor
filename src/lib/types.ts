@@ -46,6 +46,10 @@ export interface Exercise {
   longer?: boolean
   /** Süreli hareketin standart mesafesi veya tekrarı, örneğin "1000 m". */
   target?: string
+  /** Motra ince kas kategorileri (gösterim ve filtre). İlki ana kategoridir. */
+  cats?: string[]
+  /** Motra ekipman etiketi id'si (gösterim ve filtre). */
+  gear?: string
 }
 
 export interface SetEntry {
