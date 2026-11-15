@@ -85,7 +85,9 @@ export function useCloud(): CloudState {
 }
 
 export function usePremium(): boolean {
-  return isPremium(useCloud().sub) || redeemed(useApp().settings)
+  const sub = useCloud().sub
+  const settings = useApp().settings
+  return isPremium(sub) || redeemed(settings)
 }
 
 // ---------- Yerel kayıtlar ----------

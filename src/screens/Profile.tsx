@@ -21,7 +21,6 @@ import { int, parseNum, relDay, timer } from '../lib/format'
 import { bodyweightRange, fromW, toW, wBig, wNum1, wUnit } from '../lib/units'
 import { routineSummary, useBoard } from '../lib/hooks'
 import { toCsv } from '../lib/importer'
-import { PLACEMENT_GROUPS } from '../lib/rank'
 import { redeemed } from '../lib/cloud-core'
 import { go } from '../lib/router'
 import { streak, workoutVolume } from '../lib/stats'
@@ -180,9 +179,7 @@ export function Profile() {
           <div className="row__main">
             <div className="pcard__name">{p.name || t('Sporcu')}</div>
             <div className="row__sub" style={{ whiteSpace: 'normal' }}>
-              {board.overall
-                ? board.overall.label
-                : t('Genel rank için {0} kas grubu daha', Math.max(1, PLACEMENT_GROUPS - board.rankedCount))}
+              {board.overall ? board.overall.label : t('İlk rank\'li setinle genel rankın açılır')}
             </div>
           </div>
           <button className="iconbtn" onClick={() => setNameSheet(true)} aria-label={t('Adı düzenle')}>
@@ -297,7 +294,7 @@ export function Profile() {
           </div>
         )}
         <p className="note" style={{ marginTop: 12 }}>
-          {t('Her antrenman, yapıldığı günkü vücut ağırlığınla değerlendirilir. Kilon değişince güncelle; eski antrenmanların rank\'i değişmez.')}
+          {t('Kilon değişince güncelle; eski antrenmanlar etkilenmez.')}
         </p>
       </section>
 

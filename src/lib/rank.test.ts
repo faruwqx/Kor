@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { demoState } from './demo'
-import { findExercise } from './exercises'
+import { RANKED_MUSCLES, findExercise } from './exercises'
 import { weekStart } from './format'
 import { KOR_RP, e1rm, kgAtReps, kgForRp, personalRank, rankBoard, rankFromRp, setRp } from './rank'
 import { streak, workoutPRs, workoutVolume } from './stats'
@@ -97,22 +97,29 @@ function w(id: string, at: number, sets: [string, number, number][], bodyweight 
 
 describe('rankBoard', () => {
   const day = 86_400_000
-  it('dört gruptan azında genel rank yok (yerleştirme)', () => {
-    const board = rankBoard(
-      [w('a', day, [['bench', 100, 5], ['row', 80, 5], ['squat', 120, 5]])],
-      'm',
-    )
-    expect(board.rankedCount).toBe(3)
+  it('hiç sıralanmış grup yoksa genel rank yok', () => {
+    const board = rankBoard([], 'm')
+    expect(board.rankedCount).toBe(0)
     expect(board.overall).toBeNull()
   })
-  it('genel rank sıralanmış grupların ortalamasıdır', () => {
+  it('bir grup bile sıralanınca genel rank var', () => {
+    const board = rankBoard([w('a', day, [['bench', 100, 5]])], 'm')
+    expect(board.rankedCount).toBe(1)
+    const sum = board.muscles.filter((m) => m.rank).reduce((a, m) => a + m.rank!.rp, 0)
+    expect(board.overall!.rp).toBe(Math.round(sum / RANKED_MUSCLES.length))
+  })
+  it('genel rank tüm sıralanabilir grupların (0 dahil) ortalamasıdır', () => {
     const board = rankBoard(
       [w('a', day, [['bench', 100, 5], ['row', 80, 5], ['squat', 120, 5], ['ohp', 60, 5]])],
       'm',
     )
-    const ranked = board.muscles.filter((m) => m.rank)
-    const mean = ranked.reduce((a, m) => a + m.rank!.rp, 0) / ranked.length
-    expect(board.overall!.rp).toBe(Math.round(mean))
+    const sum = board.muscles.filter((m) => m.rank).reduce((a, m) => a + m.rank!.rp, 0)
+    expect(board.overall!.rp).toBe(Math.round(sum / RANKED_MUSCLES.length))
+  })
+  it('daha fazla grup eklenince genel rank yükselir', () => {
+    const one = rankBoard([w('a', day, [['bench', 100, 5]])], 'm')
+    const two = rankBoard([w('a', day, [['bench', 100, 5], ['squat', 120, 5]])], 'm')
+    expect(two.overall!.rp).toBeGreaterThan(one.overall!.rp)
   })
   it('kas grubunu en yüksek RP veren hareket taşır', () => {
     const board = rankBoard([w('a', day, [['bench', 60, 5], ['dips', 40, 5]])], 'm')

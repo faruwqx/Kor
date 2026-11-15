@@ -914,6 +914,17 @@ const d: Record<string, string> = {
     'Rango personal: según tu propio progreso en este ejercicio. Pasa a ser un rango público cuando haya un estándar común.',
   'Bu harekette kişisel rank için en az bir çalışma seti kaydet.':
     'Registra al menos una serie efectiva para obtener un rango personal en este ejercicio.',
+  'İlk rank\'li setini kaydet, genel rankın açılsın.': 'Registra tu primera serie con rango para abrir tu rango general.',
+  '{0}/{1} grup sıralandı · kalanları ekledikçe yükselir': '{0}/{1} grupos clasificados · añade el resto para subir',
+  '{0} kas grubunun ortalaması': 'promedio de {0} grupos musculares',
+  'Rank\'li bir harekette tek set, genel rankını başlatır.': 'Una serie de un ejercicio con rango inicia tu rango general.',
+  'Kaldırdığın kilonun vücut ağırlığına oranı RP\'ye çevrilir. Her kas grubunu en iyi hareketin belirler; genel rank tüm grupların ortalamasıdır.': 'El peso que levantas en relación con tu peso corporal se convierte en RP. Tu mejor ejercicio define cada grupo muscular; el rango general es el promedio de todos los grupos.',
+  '12 tekrar üstü, ısınma setleri ve standardı olmayan hareketler sayılmaz.': 'Más de 12 repeticiones, series de calentamiento y ejercicios sin estándar no cuentan.',
+  'İlk rank\'li setinle genel rankın açılır': 'Tu primera serie con rango abre tu rango general',
+  'Kilon değişince güncelle; eski antrenmanlar etkilenmez.': 'Actualiza cuando cambie tu peso; los entrenamientos pasados no se ven afectados.',
+  'Genel rankını başlat': 'Inicia tu rango general',
+  'Rank\'li bir hareket kaydet, listeye genel rank\'inle girersin.': 'Registra un ejercicio con rango para aparecer en la tabla con tu rango general.',
+  'En az iki tartım gir, değişimin burada çizilsin.': 'Registra al menos dos pesajes para ver tu cambio.',
 }
 
 export default d

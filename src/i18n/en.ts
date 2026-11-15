@@ -914,6 +914,17 @@ const d: Record<string, string> = {
     'Personal rank: based on your own progress on this move. It becomes a public rank once a shared standard arrives.',
   'Bu harekette kişisel rank için en az bir çalışma seti kaydet.':
     'Log at least one working set to get a personal rank on this move.',
+  'İlk rank\'li setini kaydet, genel rankın açılsın.': 'Log your first ranked set to open your overall rank.',
+  '{0}/{1} grup sıralandı · kalanları ekledikçe yükselir': '{0}/{1} groups ranked · add the rest to climb',
+  '{0} kas grubunun ortalaması': '{0} muscle groups averaged',
+  'Rank\'li bir harekette tek set, genel rankını başlatır.': 'One set of a ranked move starts your overall rank.',
+  'Kaldırdığın kilonun vücut ağırlığına oranı RP\'ye çevrilir. Her kas grubunu en iyi hareketin belirler; genel rank tüm grupların ortalamasıdır.': 'The weight you lift relative to your bodyweight becomes RP. Your best move sets each muscle group; overall rank is the average of all groups.',
+  '12 tekrar üstü, ısınma setleri ve standardı olmayan hareketler sayılmaz.': 'Over 12 reps, warm-up sets and moves without a standard don’t count.',
+  'İlk rank\'li setinle genel rankın açılır': 'Your first ranked set opens your overall rank',
+  'Kilon değişince güncelle; eski antrenmanlar etkilenmez.': 'Update when your weight changes; past workouts aren’t affected.',
+  'Genel rankını başlat': 'Start your overall rank',
+  'Rank\'li bir hareket kaydet, listeye genel rank\'inle girersin.': 'Log a ranked move to appear on the board with your overall rank.',
+  'En az iki tartım gir, değişimin burada çizilsin.': 'Log at least two weigh-ins to chart your change.',
 }
 
 export default d

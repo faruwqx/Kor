@@ -12,7 +12,6 @@ import {
   routineSummary,
   useBoard,
 } from '../lib/hooks'
-import { PLACEMENT_GROUPS } from '../lib/rank'
 import { go } from '../lib/router'
 import { streak, workoutSetCount, workoutVolume } from '../lib/stats'
 import { actions, useApp } from '../lib/store'
@@ -150,11 +149,9 @@ export function Today() {
           <div className="rankhero">
             <Emblem rank={null} size={56} />
             <div className="rankhero__body">
-              <h2>
-                {t('Yerleştirme')} {board.rankedCount}/{PLACEMENT_GROUPS}
-              </h2>
+              <h2>{t('Genel rankını başlat')}</h2>
               <p className="row__sub" style={{ whiteSpace: 'normal' }}>
-                {t('Genel rank için')} {PLACEMENT_GROUPS - board.rankedCount} {t('kas grubunda daha rank\'li bir hareket kaydet.')}
+                {t('Rank\'li bir harekette tek set, genel rankını başlatır.')}
               </p>
             </div>
             <ChevronRight className="chev" />

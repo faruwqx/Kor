@@ -329,7 +329,7 @@ export function Trends() {
           />
         ) : (
           <p className="hint">
-            {t('Grafik için en az iki kayıt gerekir. Haftada bir aynı saatte tartılıp buraya girersen değişimin burada çizilir.')}
+            {t('En az iki tartım gir, değişimin burada çizilsin.')}
           </p>
         )}
         <button className="btn btn--ghost btn--sm" style={{ alignSelf: 'flex-start' }} onClick={() => setWeighing(true)}>

@@ -1,8 +1,8 @@
 import { ChevronRight, Swords, Trophy } from 'lucide-react'
-import { MUSCLE_COLOR, findExercise, muscleName } from '../lib/exercises'
+import { MUSCLE_COLOR, RANKED_MUSCLES, findExercise, muscleName } from '../lib/exercises'
 import { int } from '../lib/format'
 import { useBoard } from '../lib/hooks'
-import { KOR_RP, PLACEMENT_GROUPS, RP_PER_TIER, TIERS } from '../lib/rank'
+import { KOR_RP, RP_PER_TIER, TIERS } from '../lib/rank'
 import { go } from '../lib/router'
 import { useApp } from '../lib/store'
 import { Emblem } from '../ui/Emblem'
@@ -41,7 +41,7 @@ export function RankScreen() {
         ? t('{0} kas grubunun ortalaması.', ranked.length)
         : t('En güçlü grubun {0}, en geride kalan {1}: aralarında {2} RP var.', muscleName(top.muscle), muscleName(low.muscle), int(top.rank!.rp - low.rank!.rp))
   } else {
-    finding = t('Genel rank {0} kas grubu sıralanınca açılır. Şu an {1} grup sıralandı.', PLACEMENT_GROUPS, board.rankedCount)
+    finding = t('İlk rank\'li setini kaydet, genel rankın açılsın.')
   }
 
   return (
@@ -65,32 +65,24 @@ export function RankScreen() {
               <div className="rankhero__body">
                 <div className="fig rankhero__label">{overall.label}</div>
                 <div className="rankhero__rp">
-                  {t('Genel rank ·')} {board.rankedCount} {t('kas grubunun ortalaması')}
+                  {board.rankedCount < RANKED_MUSCLES.length
+                    ? t('{0}/{1} grup sıralandı · kalanları ekledikçe yükselir', board.rankedCount, RANKED_MUSCLES.length)
+                    : t('{0} kas grubunun ortalaması', board.rankedCount)}
                 </div>
               </div>
             </div>
             <RankBar rank={overall} />
           </>
         ) : (
-          <>
-            <div className="rankhero" style={{ marginBottom: 16 }}>
-              <Emblem rank={null} size={76} />
-              <div className="rankhero__body">
-                <div className="fig rankhero__label">
-                  {t('Yerleştirme')} {board.rankedCount}/{PLACEMENT_GROUPS}
-                </div>
-                <div className="rankhero__rp">
-                  {t('Rank\'li bir hareketten tek çalışma seti, o kas grubunu sıralar.')}
-                </div>
+          <div className="rankhero">
+            <Emblem rank={null} size={76} />
+            <div className="rankhero__body">
+              <div className="fig rankhero__label">{t('Rank yok')}</div>
+              <div className="rankhero__rp">
+                {t('Rank\'li bir harekette tek set, genel rankını başlatır.')}
               </div>
             </div>
-            <div className="bar">
-              <div
-                className="bar__fill"
-                style={{ width: `${(board.rankedCount / PLACEMENT_GROUPS) * 100}%` }}
-              />
-            </div>
-          </>
+          </div>
         )}
       </section>
 
@@ -178,10 +170,10 @@ export function RankScreen() {
       </div>
       <div className="card">
         <p className="muted" style={{ fontSize: 14, lineHeight: 1.55 }}>
-          {t('Her çalışma setinden tahmini tek tekrar maksimumun (1TM) çıkarılır ve vücut ağırlığına bölünür. Bu oran, hareketin kendi standardına göre 0 ile')} {int(KOR_RP)} {t('RP arasına oturur. Ölçek başta hızlı ilerler: ilk kademeler çabuk açılır, üst kademeler giderek daha çok güç ister. Her kademe üç basamaktır, her basamak 100 RP. Kas grubunun rank\'ini o grubun en yüksek RP\'li hareketi belirler; genel rank sıralanmış grupların ortalamasıdır.')}
+          {t('Kaldırdığın kilonun vücut ağırlığına oranı RP\'ye çevrilir. Her kas grubunu en iyi hareketin belirler; genel rank tüm grupların ortalamasıdır.')}
         </p>
         <p className="note" style={{ marginTop: 10 }}>
-          {t('12 tekrarın üstündeki setler, ısınma setleri ve standardı olmayan hareketler (çoğu makine) rank\'e sayılmaz. Standartlar Kor\'un kendi tablosudur; başka sporcularla karşılaştırma değildir.')}
+          {t('12 tekrar üstü, ısınma setleri ve standardı olmayan hareketler sayılmaz.')}
         </p>
       </div>
     </>

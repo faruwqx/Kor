@@ -47,7 +47,6 @@ export const RANK_CURVE = 0.7
  * Kor dahil, ham standarttan %35 daha az kiloyla açılır.
  */
 export const RANK_EASE = 0.65
-export const PLACEMENT_GROUPS = 4
 export const MAX_RANK_REPS = 12
 
 const ROMAN = ['III', 'II', 'I']
@@ -220,7 +219,7 @@ export interface MuscleRank {
 export interface RankBoard {
   muscles: MuscleRank[]
   rankedCount: number
-  /** En az PLACEMENT_GROUPS grup sıralanınca dolar. */
+  /** En az bir grup sıralanınca dolar; sıralanmamış gruplar 0 RP sayılır. */
   overall: Rank | null
   lifts: Map<string, BestLift>
 }
@@ -243,8 +242,8 @@ export function rankBoard(
   })
   const ranked = muscles.filter((m) => m.rank)
   const overall =
-    ranked.length >= PLACEMENT_GROUPS
-      ? rankFromRp(ranked.reduce((a, m) => a + m.rank!.rp, 0) / ranked.length)
+    ranked.length > 0
+      ? rankFromRp(ranked.reduce((a, m) => a + m.rank!.rp, 0) / RANKED_MUSCLES.length)
       : null
   return { muscles, rankedCount: ranked.length, overall, lifts }
 }
