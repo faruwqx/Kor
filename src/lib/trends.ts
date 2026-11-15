@@ -131,6 +131,54 @@ export function muscleLoad(
   return out
 }
 
+/** Kor kaba kas → ince kas haritası (Motra kategorisi olmayan Kor hareketleri için). */
+const MUSCLE2FINE: Record<MuscleId, string> = {
+  chest: 'chest',
+  back: 'lats',
+  shoulders: 'shoulders',
+  biceps: 'biceps',
+  triceps: 'triceps',
+  quads: 'quads',
+  posterior: 'glutes',
+  core: 'abs',
+  calves: 'calves',
+  hyrox: '',
+  cardio: '',
+}
+
+/** İnce kas bazında tekrar/set/hacim. Vücut haritası bununla boyanır. */
+export function regionLoad(
+  workouts: Workout[],
+  custom: Exercise[] = [],
+): Record<string, Record<LoadMetric, number>> {
+  const out: Record<string, { reps: number; sets: number; volume: number }> = {}
+  const add = (c: string, m: 'reps' | 'sets' | 'volume', v: number) => {
+    if (!c) return
+    ;(out[c] ??= { reps: 0, sets: 0, volume: 0 })[m] += v
+  }
+  for (const w of workouts) {
+    for (const we of w.exercises) {
+      const ex = findExercise(we.exerciseId, custom)
+      const cats = ex.cats?.length ? ex.cats : [MUSCLE2FINE[ex.muscle]]
+      let sets = 0
+      let reps = 0
+      for (const s of we.sets) {
+        if (!isWorkSet(s)) continue
+        sets++
+        if (!ex.timed) reps += s.reps
+      }
+      const volume = exerciseVolume(we, ex, w.bodyweight)
+      cats.forEach((c, idx) => {
+        const k = idx === 0 ? 1 : 0.5
+        add(c, 'sets', sets * k)
+        add(c, 'reps', reps * k)
+        add(c, 'volume', volume * k)
+      })
+    }
+  }
+  return out as Record<string, Record<LoadMetric, number>>
+}
+
 /** Aralıkta yapılan hareketler, set sayısına göre çoktan aza. */
 export function exerciseCounts(workouts: Workout[]): { id: string; sets: number }[] {
   const counts = new Map<string, number>()
