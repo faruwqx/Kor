@@ -1,7 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import {
   LB,
+  activityName,
   buildImport,
+  fileSlug,
+  guessExercise,
   matchExercise,
   parseCsv,
   parseDate,
@@ -9,6 +12,7 @@ import {
   parseImport,
   summarizeExercises,
   toCsv,
+  workoutFile,
   type Mapping,
   type ParsedImport,
 } from './importer'
@@ -206,12 +210,114 @@ describe('geçiş güvenliği', () => {
     if ('error' in p) throw new Error('tanınmadı: ' + p.error)
     expect(p.format).toBe('blocks')
     expect(p.unit).toBe('lb')
-    // Yürüyüşte set yok; yalnızca ikinci antrenmanın 3 seti okunur.
-    expect(p.rows.length).toBe(3)
-    expect(p.rows[0]).toMatchObject({ workout: 'Monday Night Upper Body', exercise: 'Dumbbell Hammer Curl', reps: 18 })
+    // Yürüyüşte set yok: süresiyle tek bir kardiyo kaydı olur, düşmez. Ardından 3 set.
+    expect(p.rows.length).toBe(4)
+    expect(p.rows[0]).toMatchObject({ workout: 'Tuesday Afternoon Walk', exercise: 'Walk', reps: null, sec: 611 })
+    expect(p.rows[1]).toMatchObject({ workout: 'Monday Night Upper Body', exercise: 'Dumbbell Hammer Curl', reps: 18 })
     // Plank: tekrar 0, süre 30 → süreli set.
     const plank = p.rows.find((r) => r.exercise === 'Plank')!
     expect(plank.reps).toBeNull()
     expect(plank.sec).toBe(30)
+    // İki antrenman da aktarılır; yürüyüş Kor'un yürüyüş hareketine yazılır.
+    const r = plan(p)
+    expect(r.workouts).toHaveLength(2)
+    const walk = r.workouts.find((w) => w.name === 'Tuesday Afternoon Walk')!
+    expect(walk.exercises[0]).toMatchObject({ exerciseId: 'walk', sets: [{ sec: 611 }] })
+  })
+})
+
+describe('setsiz (kardiyo) antrenmanlar ve Motra adları', () => {
+  const block = (title: string, start: string, end: string, sets: string[] = [], total = '') =>
+    [
+      title,
+      `Workout Start\t${start}`,
+      `Workout End\t${end}`,
+      ...(total ? [`Total Duration (seconds)\t${total}`] : []),
+      'Total Sets\t' + sets.length,
+      '',
+      'All Sets',
+      'Exercise\tWeight (lbs)\tReps\tTime (seconds)\tDistance (m)\tRest Time (seconds)\tEffort\tPrimary Muscle Groups\tNote',
+      ...sets,
+      '',
+    ].join('\n')
+
+  it('etkinlik adı gün ve gün diliminden ayrılır', () => {
+    expect(activityName('Friday Evening Swim Session')).toBe('Swim Session')
+    expect(activityName('Sunday Morning Run')).toBe('Run')
+    expect(activityName('Thursday Afternoon Basketball')).toBe('Basketball')
+    expect(activityName('Cuma Akşam Yüzme')).toBe('Yüzme')
+    // Yalnızca gün adı kalırsa ad korunur.
+    expect(activityName('Sunday')).toBe('Sunday')
+  })
+
+  it('her setsiz antrenman süreli kardiyo olarak aktarılır', () => {
+    const tsv = [
+      block('Friday Evening Swim Session', '2026-03-06 19:00:00', '2026-03-06 19:40:00', [], '2400'),
+      block('Friday Evening Underwater Diving', '2026-03-13 19:00:00', '2026-03-13 19:30:00'),
+      block('Saturday Afternoon Strength Training', '2026-03-14 15:00:00', '2026-03-14 15:45:00'),
+    ].join('\n')
+    const r = plan(ok(tsv), 'lb')
+    expect(r.workouts).toHaveLength(3)
+    const swim = r.workouts.find((w) => w.name.includes('Swim'))!
+    expect(swim.exercises[0]).toMatchObject({ exerciseId: 'swimming', sets: [{ sec: 2400 }] })
+    // Total Duration yoksa başlangıç–bitişten: 30 dk.
+    const diving = r.newExercises.find((e) => e.name === 'Underwater Diving')!
+    expect(diving).toMatchObject({ muscle: 'cardio', timed: true })
+    expect(r.workouts.find((w) => w.name.includes('Diving'))!.exercises[0].sets[0].sec).toBe(1800)
+    // Setsiz "Strength Training" oturumu bir kas grubuna (core) yazılmaz.
+    expect(r.newExercises.find((e) => e.name === 'Strength Training')).toMatchObject({ muscle: 'cardio', timed: true })
+  })
+
+  it('art arda iki ayrı antrenman birleşmez, ama aynısı yine tekrar sayılır', () => {
+    const tsv = [
+      block('Sunday Morning Run', '2026-05-03 05:54:41', '2026-05-03 05:56:10'),
+      block('Sunday Morning Run', '2026-05-03 05:56:18', '2026-05-03 06:03:09'),
+    ].join('\n')
+    const first = plan(ok(tsv))
+    expect(first.workouts).toHaveLength(2)
+    expect(first.duplicates).toBe(0)
+    const again = plan(ok(tsv), 'kg', first.workouts)
+    expect(again.workouts).toHaveLength(0)
+    expect(again.duplicates).toBe(2)
+  })
+
+  it('ekipmanı başta yazan Motra adları Kor hareketine eşleşir', () => {
+    expect(matchExercise('Dumbbell Lateral Raise')).toBe('lateral-raise')
+    expect(matchExercise('Dumbbell Hammer Curl')).toBe('hammer-curl')
+    expect(matchExercise('EZ-Bar Bicep Curl')).toBe('ez-curl')
+    expect(matchExercise('Barbell Shrug')).toBe('shrug')
+    expect(matchExercise('Pull-Up')).toBe('pullup')
+  })
+
+  it('tek antrenman dosyası özel hareketiyle birlikte birebir geri gelir', () => {
+    const custom = [{ id: 'custom-x', name: 'Benim hareketim', muscle: 'chest' as const, equipment: 'other' as const, load: 'external' as const, custom: true }]
+    const w: Workout = {
+      id: 'w9',
+      name: 'Push Day',
+      startedAt: 1_700_000_000_000,
+      endedAt: 1_700_003_600_000,
+      bodyweight: 80,
+      exercises: [
+        { uid: 'a', exerciseId: 'bench', sets: [{ kg: 60, reps: 5, done: true }] },
+        { uid: 'b', exerciseId: 'custom-x', sets: [{ kg: 10, reps: 12, done: true }] },
+      ],
+    }
+    const unrelated = { ...custom[0], id: 'custom-y', name: 'Kullanılmayan' }
+    const text = workoutFile([w], [...custom, unrelated])
+    const p = ok(text)
+    expect(p.format).toBe('kor-workout')
+    // Başka cihaz: hiçbir şey yok → antrenman ve yalnızca kullandığı özel hareket gelir.
+    const r = plan(p)
+    expect(r.workouts).toEqual([w])
+    expect(r.newExercises.map((e) => e.id)).toEqual(['custom-x'])
+    // Aynı cihaz: zaten kayıtlı.
+    expect(plan(p, 'kg', [w]).workouts).toHaveLength(0)
+    expect(fileSlug('Push Day #2 – Göğüs')).toBe('push-day-2-gogus')
+  })
+
+  it('tahmin kelime içini eşlemez: makine hareketi sırt, crunch kardiyo sayılmaz', () => {
+    expect(guessExercise('Smith Machine Incline Bench Press').muscle).toBe('chest')
+    expect(guessExercise('Weird Reverse Crunch').muscle).toBe('core')
+    expect(guessExercise('Underwater Diving')).toMatchObject({ muscle: 'cardio', timed: true })
   })
 })

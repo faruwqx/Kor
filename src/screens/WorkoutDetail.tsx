@@ -1,4 +1,4 @@
-import { ArrowLeft, ListPlus, MoreHorizontal, Trash2, Trophy } from 'lucide-react'
+import { ArrowLeft, FileSpreadsheet, ListPlus, MoreHorizontal, Share2, Trash2, Trophy } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { usePremium } from '../lib/cloud'
 import { FREE_ROUTINES } from '../lib/cloud-core'
@@ -8,6 +8,8 @@ import { fw1, fwi, wInt, wNum1, wUnit } from '../lib/units'
 import { e1rm, rankBoard, setLoad, setRp, MAX_RANK_REPS } from '../lib/rank'
 import { back, go } from '../lib/router'
 import { isWorkSet, volumePRs, workoutPRs, workoutSetCount, workoutVolume } from '../lib/stats'
+import { fileSlug, toCsv, workoutFile } from '../lib/importer'
+import { saveFile } from '../lib/share'
 import { actions, useApp } from '../lib/store'
 import { Emblem } from '../ui/Emblem'
 import { Confetti, Confirm, Sheet, toast } from '../ui/kit'
@@ -74,6 +76,18 @@ export function WorkoutDetail({ id, fresh }: { id: string; fresh?: boolean }) {
         <p className="empty">{t('Bu antrenman silinmiş olabilir.')}</p>
       </>
     )
+  }
+
+  const exportAs = async (kind: 'json' | 'csv') => {
+    setMenu(false)
+    const d = new Date(w.startedAt)
+    const pad = (n: number) => String(n).padStart(2, '0')
+    const base = `kor-${fileSlug(w.name)}-${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+    const res =
+      kind === 'json'
+        ? await saveFile(`${base}.json`, 'application/json', workoutFile([w], s.customExercises))
+        : await saveFile(`${base}.csv`, 'text/csv', '﻿' + toCsv([w], s.customExercises))
+    if (res === 'downloaded') toast(t('Antrenman dosyası indirildi'))
   }
 
   const { prs, volume } = records
@@ -375,6 +389,20 @@ export function WorkoutDetail({ id, fresh }: { id: string; fresh?: boolean }) {
               <div className="row__main">
                 <div>{t('Program olarak kaydet')}</div>
                 <div className="row__sub">{t('Aynı hareketlerle tekrar başlatabilirsin')}</div>
+              </div>
+            </button>
+            <button className="row" onClick={() => exportAs('json')}>
+              <Share2 />
+              <div className="row__main">
+                <div>{t('Antrenmanı paylaş')}</div>
+                <div className="row__sub">{t('Kor dosyası: başka bir telefonda İçe aktar ile birebir açılır')}</div>
+              </div>
+            </button>
+            <button className="row" onClick={() => exportAs('csv')}>
+              <FileSpreadsheet />
+              <div className="row__main">
+                <div>{t('CSV olarak dışa aktar')}</div>
+                <div className="row__sub">{t('Excel, Google Sheets ve diğer uygulamalar için')}</div>
               </div>
             </button>
             <button

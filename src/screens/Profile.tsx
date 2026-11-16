@@ -476,9 +476,14 @@ export function Profile() {
 
       <div className="section">
         <h2>{t('Programlar')}</h2>
-        <button className="link" onClick={() => go('/routine/new')}>
-          {t('Yeni program')}
-        </button>
+        <span className="section__links">
+          <button className="link" onClick={() => go('/routine/photo')}>
+            {t('Fotoğraftan')}
+          </button>
+          <button className="link" onClick={() => go('/routine/new')}>
+            {t('Yeni program')}
+          </button>
+        </span>
       </div>
       {s.routines.length ? (
         <div className="card card--flush rows">
