@@ -9,7 +9,7 @@ import { BUILTIN, findExercise } from './exercises'
 import { startOfDay, uid } from './format'
 import type { Equipment, Exercise, MuscleId, SetEntry, Workout } from './types'
 
-export type ImportFormat = 'strong' | 'hevy' | 'fitnotes' | 'generic' | 'blocks' | 'kor-json'
+export type ImportFormat = 'strong' | 'hevy' | 'fitnotes' | 'generic' | 'blocks' | 'kor-json' | 'kor-workout'
 export type Unit = 'kg' | 'lb'
 
 export const FORMAT_NAME: Record<ImportFormat, string> = {
@@ -19,7 +19,11 @@ export const FORMAT_NAME: Record<ImportFormat, string> = {
   generic: 'Genel tablo (CSV)',
   blocks: 'Antrenman dışa aktarımı',
   'kor-json': 'Kor yedeği',
+  'kor-workout': 'Kor antrenmanı',
 }
+
+/** Antrenman dosyasının türü: tam yedekten ayırmak için. */
+export const WORKOUT_FILE_KIND = 'kor-workouts'
 
 export const LB = 0.45359237
 const DAY = 86_400_000
@@ -167,6 +171,8 @@ export interface ImportRow {
   reps: number | null
   sec?: number
   warmup: boolean
+  /** Setsiz antrenmandan türetilen tek süre kaydı (yürüyüş, yüzme…). */
+  session?: boolean
 }
 
 export interface ParsedImport {
@@ -238,17 +244,40 @@ function parseBlocks(text: string): ParsedImport | null {
     }
     let start: number | null = null
     let end: number | undefined
+    let total: number | null = null
     let header = -1
     for (let k = si; k < blockEnd; k++) {
       const c = blockCells(lines[k])
       if (c[0] === 'Workout Start') start = parseDate(c[1] ?? '')
       else if (c[0] === 'Workout End') end = parseDate(c[1] ?? '') ?? undefined
+      else if (/^Total Duration/i.test(c[0] ?? '')) total = parseDuration(c[1])
       else if (c[0] === 'All Sets') {
         header = k + 1
         break
       }
     }
-    if (start == null || header < 0) continue
+    if (start == null) continue
+    const t0 = start
+    const before = rows.length
+    // Setsiz antrenman (yürüyüş, yüzme, koşu…): tek bir süreli kardiyo seti olarak korunur.
+    const pushCardio = () => {
+      const sec = total ?? (end && end > t0 ? Math.round((end - t0) / 1000) : null)
+      rows.push({
+        start: t0,
+        end,
+        workout: name,
+        exercise: activityName(name),
+        weight: null,
+        reps: null,
+        sec: sec && sec > 0 ? sec : DEFAULT_MINUTES * 60,
+        warmup: false,
+        session: true,
+      })
+    }
+    if (header < 0) {
+      pushCardio()
+      continue
+    }
     const head = blockCells(lines[header] ?? '')
     const col = headerFinder(head)
     const ie = col(['exercise'])
@@ -276,9 +305,25 @@ function parseBlocks(text: string): ParsedImport | null {
         warmup: false,
       })
     }
+    if (rows.length === before) pushCardio()
   }
   if (!rows.length) return null
   return { format: 'blocks', unit, rows, skipped: 0 }
+}
+
+const LEAD_WORDS = new Set([
+  'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday',
+  'early', 'late', 'morning', 'afternoon', 'evening', 'night', 'midday', 'lunch',
+  'pazartesi', 'sali', 'carsamba', 'persembe', 'cuma', 'cumartesi', 'pazar',
+  'sabah', 'ogle', 'ogleden', 'sonra', 'aksam', 'gece',
+])
+
+/** "Friday Evening Swim Session" → "Swim Session": baştaki gün ve gün dilimi kelimeleri atılır. */
+export function activityName(title: string): string {
+  const words = title.trim().split(/\s+/)
+  let i = 0
+  while (i < words.length - 1 && LEAD_WORDS.has(fold(words[i]))) i++
+  return words.slice(i).join(' ') || 'Kardiyo'
 }
 
 export function parseImport(text: string): ParsedImport | { error: string } {
@@ -287,13 +332,18 @@ export function parseImport(text: string): ParsedImport | { error: string } {
 
   if (trimmed.startsWith('{')) {
     try {
-      const d = JSON.parse(trimmed) as Partial<{ workouts: Workout[]; customExercises: Exercise[] }>
+      const d = JSON.parse(trimmed) as Partial<{ kind: string; workouts: Workout[]; customExercises: Exercise[] }>
       if (!Array.isArray(d.workouts)) return { error: 'Bu JSON bir Kor yedeği değil.' }
       const ok = d.workouts.filter(
-        (w) => w && typeof w.id === 'string' && typeof w.startedAt === 'number' && Array.isArray(w.exercises),
+        (w) =>
+          w &&
+          typeof w.id === 'string' &&
+          typeof w.startedAt === 'number' &&
+          typeof w.endedAt === 'number' &&
+          Array.isArray(w.exercises),
       )
       return {
-        format: 'kor-json',
+        format: d.kind === WORKOUT_FILE_KIND ? 'kor-workout' : 'kor-json',
         unit: 'kg',
         rows: [],
         skipped: d.workouts.length - ok.length,
@@ -466,6 +516,9 @@ const ALIASES: Record<string, string> = {
   'chest fly|machine': 'pec-deck', 'pec deck': 'pec-deck', 'butterfly|pec deck': 'pec-deck', 'butterfly': 'pec-deck',
   'chest dip': 'dips', 'dip': 'dips', 'dips': 'dips', 'triceps dip': 'dips', 'chest dip|weighted': 'dips',
   'push up': 'pushup', 'pushup': 'pushup', 'push ups': 'pushup',
+  // Türkçe salon adları: arayüz İngilizce olsa da Türkçe liste eşleşsin.
+  'sinav': 'pushup', 'barfiks': 'pullup', 'genis barfiks': 'pullup', 'ters barfiks': 'chinup', 'mekik': 'situp',
+  'ayakta calf raise': 'calf-raise', 'ayakta baldir': 'calf-raise', 'oturarak baldir': 'seated-calf',
   // Sırt
   'bent over row|barbell': 'row', 'barbell row': 'row', 'bent over row': 'row',
   'bent over one arm row|dumbbell': 'db-row', 'dumbbell row': 'db-row', 'one arm row|dumbbell': 'db-row', 'dumbbell row|dumbbell': 'db-row',
@@ -537,8 +590,11 @@ const ALIASES: Record<string, string> = {
   'hanging leg raise': 'hanging-leg-raise', 'hanging knee raise': 'hanging-knee-raise',
   'cable crunch': 'cable-crunch', 'ab wheel': 'ab-wheel', 'ab wheel rollout': 'ab-wheel', 'russian twist': 'russian-twist',
   // Kardiyo
-  'running': 'run', 'running|treadmill': 'run', 'treadmill': 'run', 'run': 'run', 'jogging': 'jog', 'walking': 'walk',
-  'cycling': 'cycling', 'stationary bike': 'cycling', 'bike': 'cycling',
+  'running': 'run', 'running|treadmill': 'run', 'treadmill': 'run', 'run': 'run', 'jogging': 'jog', 'jog': 'jog',
+  'walking': 'walk', 'walk': 'walk', 'hike': 'walk', 'hiking': 'walk', 'yuruyus': 'walk',
+  'swim': 'swimming', 'swim session': 'swimming', 'pool swim': 'swimming', 'open water swim': 'swimming', 'yuzme': 'swimming',
+  'ride': 'cycling', 'bike ride': 'cycling', 'outdoor ride': 'cycling', 'indoor ride': 'cycling', 'cycle': 'cycling',
+  'cycling': 'cycling', 'stationary bike': 'cycling', 'bike': 'cycling', 'bisiklet': 'cycling', 'kosu': 'run',
   'rowing|machine': 'rowing', 'rowing machine': 'rowing', 'rowing': 'rowing',
   'elliptical trainer': 'elliptical', 'elliptical': 'elliptical', 'stair climber': 'stair-climber',
   'jump rope': 'jump-rope', 'swimming': 'swimming', 'burpee': 'burpee', 'box jump': 'box-jump',
@@ -572,22 +628,35 @@ export function matchExercise(name: string, custom: Exercise[] = []): string | n
   const { base, eq } = splitName(name)
   const eqFirst = eq.split(' ')[0] ?? ''
   const idx = nameIndex(custom)
+  // Motra/Liftoff tarzı: ekipman başta ("Dumbbell Lateral Raise" = "Lateral Raise (Dumbbell)").
+  const lead = /^(smith machine|ez bar|dumbbell|barbell|cable|machine|kettlebell|bodyweight)\s+(.+)$/.exec(base)
+  const leadAlias = lead
+    ? ALIASES[`${lead[2]}|${lead[1]}`] ||
+      ALIASES[`${lead[2].replace(/s$/, '')}|${lead[1]}`] ||
+      (lead[1] === 'bodyweight' ? ALIASES[lead[2]] : undefined)
+    : undefined
   return (
     (eq && ALIASES[`${base}|${eq}`]) ||
     (eqFirst && ALIASES[`${base}|${eqFirst}`]) ||
     ALIASES[base] ||
+    leadAlias ||
     idx.get(eq ? `${base} ${eq}` : base) ||
     idx.get(base) ||
     null
   )
 }
 
+/** Kardiyo / spor etkinliği sözcükleri (tam kelime: "crunch" içindeki "run" sayılmaz). */
+const CARDIO_WORDS =
+  /\b(run|running|jog\w*|sprint\w*|bike|biking|cycl\w*|ride|riding|treadmill|ellipt\w*|walk\w*|hike|hiking|swim\w*|cardio|rowing|stair\w*|diving|dive|scuba|snorkel\w*|basketball|football|soccer|tennis|padel|squash|volleyball|badminton|handball|boxing|kickboxing|martial|yoga|pilates|dance|dancing|ski\w*|snowboard\w*|skat\w*|surf\w*|climb\w*|bouldering|golf|hiit|kosu|bisiklet|yuruyus|yuzme|dalis|basketbol|futbol|voleybol|tenis)\b/
+
 /** Eşleşmeyen hareket için kas grubu ve ekipman tahmini (kullanıcı değiştirebilir). */
 export function guessExercise(name: string): { muscle: MuscleId; equipment: Equipment; timed: boolean } {
   const { base, eq } = splitName(name)
   const s = `${base} ${eq}`
-  const has = (...w: string[]) => w.some((x) => s.includes(x))
-  const muscle: MuscleId = has('run', 'bike', 'cycl', 'treadmill', 'ellipt', 'walk', 'swim', 'cardio', 'rowing', 'stair', 'kosu', 'bisiklet')
+  // Kelime başından eşleşir: "machine" içindeki "chin" sırt sayılmaz.
+  const has = (...w: string[]) => w.some((x) => (' ' + s).includes(' ' + x))
+  const muscle: MuscleId = CARDIO_WORDS.test(s) && !/lunge|carry|farmer/.test(s)
     ? 'cardio'
     : has('calf', 'baldir')
       ? 'calves'
@@ -664,12 +733,15 @@ export interface BuildOptions {
 const round2 = (n: number) => Math.round(n * 100) / 100
 
 export function buildImport(p: ParsedImport, o: BuildOptions): ImportPlan {
-  const isDup = (start: number, list: Workout[]) =>
-    list.some((w) => Math.abs(w.startedAt - start) < DUPLICATE_MS)
+  /** Yakın başlayan ve zaman aralığı örtüşen antrenman aynı sayılır; art arda iki koşu ayrı kalır. */
+  const isDup = (start: number, end: number, list: Workout[]) =>
+    list.some(
+      (w) => Math.abs(w.startedAt - start) < DUPLICATE_MS && w.startedAt < end && start < w.endedAt,
+    )
 
   if (p.json) {
     const ids = new Set(o.existing.map((w) => w.id))
-    const fresh = p.json.workouts.filter((w) => !ids.has(w.id) && !isDup(w.startedAt, o.existing))
+    const fresh = p.json.workouts.filter((w) => !ids.has(w.id) && !isDup(w.startedAt, w.endedAt, o.existing))
     const customIds = new Set(o.custom.map((e) => e.id))
     const used = new Set(fresh.flatMap((w) => w.exercises.map((e) => e.exerciseId)))
     return {
@@ -685,6 +757,13 @@ export function buildImport(p: ParsedImport, o: BuildOptions): ImportPlan {
   // Yeni özel hareketler: eşlemede "new" seçilenler.
   const newExercises: Exercise[] = []
   const idFor = new Map<string, string>()
+  const timedOnly = new Map<string, boolean>()
+  const sessionOnly = new Map<string, boolean>()
+  for (const r of p.rows) {
+    const t = r.reps == null && (r.sec ?? 0) > 0
+    timedOnly.set(r.exercise, (timedOnly.get(r.exercise) ?? true) && t)
+    sessionOnly.set(r.exercise, (sessionOnly.get(r.exercise) ?? true) && !!r.session)
+  }
   for (const name of new Set(p.rows.map((r) => r.exercise))) {
     const target = o.mapping[name]
     if (target && target !== 'new') {
@@ -692,14 +771,18 @@ export function buildImport(p: ParsedImport, o: BuildOptions): ImportPlan {
       continue
     }
     const g = guessExercise(name)
+    // Yalnızca süreyle kaydedilmiş (tekrarsız) hareket süreli olmalı; yoksa setleri düşer.
+    const timed = g.timed || timedOnly.get(name) === true
+    // Setsiz oturum ("Strength Training", "Core Session") bir etkinlik kaydıdır: kas grubuna yazılmaz.
+    const session = sessionOnly.get(name) === true
     const ex: Exercise = {
       id: 'custom-' + uid(),
       name: name.trim().slice(0, 60),
-      muscle: g.muscle,
-      equipment: g.equipment,
+      muscle: session ? 'cardio' : g.muscle,
+      equipment: session ? 'other' : g.equipment,
       load: g.equipment === 'bodyweight' ? 'bodyweight' : 'external',
       custom: true,
-      ...(g.timed ? { timed: true, longer: true } : {}),
+      ...(timed ? { timed: true, longer: true } : {}),
     }
     newExercises.push(ex)
     idFor.set(name, ex.id)
@@ -721,7 +804,8 @@ export function buildImport(p: ParsedImport, o: BuildOptions): ImportPlan {
   let sets = 0
   for (const rows of groups.values()) {
     const start = rows[0].start
-    if (isDup(start, o.existing) || isDup(start, workouts)) {
+    const end = Math.max(rows.find((r) => r.end)?.end ?? start + DEFAULT_MINUTES * 60_000, start + 60_000)
+    if (isDup(start, end, o.existing) || isDup(start, end, workouts)) {
       duplicates++
       continue
     }
@@ -741,12 +825,11 @@ export function buildImport(p: ParsedImport, o: BuildOptions): ImportPlan {
       sets++
     }
     if (!exercises.length) continue
-    const end = rows.find((r) => r.end)?.end ?? start + DEFAULT_MINUTES * 60_000
     workouts.push({
       id: uid(),
       name: rows[0].workout.slice(0, 60),
       startedAt: start,
-      endedAt: Math.max(end, start + 60_000),
+      endedAt: end,
       bodyweight: o.bodyweightAt(start),
       exercises,
     })
@@ -777,6 +860,34 @@ export function bodyweightLookup(entries: { at: number; kg: number }[], fallback
 }
 
 // ---------------------------------------------------------------- Dışa aktarma
+
+/**
+ * Seçili antrenman(lar)ı tek başına taşınabilir bir Kor dosyasına çevirir: kullandıkları özel
+ * hareketler de içindedir, başka bir cihazda İçe aktar ile birebir geri gelir.
+ */
+export function workoutFile(workouts: Workout[], custom: Exercise[] = []): string {
+  const used = new Set(workouts.flatMap((w) => w.exercises.map((e) => e.exerciseId)))
+  return JSON.stringify(
+    {
+      kind: WORKOUT_FILE_KIND,
+      version: 1,
+      workouts,
+      customExercises: custom.filter((e) => used.has(e.id)),
+    },
+    null,
+    2,
+  )
+}
+
+/** Dosya adı için güvenli parça: "Push Day #2" → "push-day-2". */
+export function fileSlug(s: string): string {
+  return (
+    fold(s)
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .slice(0, 40) || 'antrenman'
+  )
+}
 
 /** Kor verisini her uygulamanın okuyabileceği düz CSV'ye çevirir (bir satır = bir set). */
 export function toCsv(workouts: Workout[], custom: Exercise[] = []): string {

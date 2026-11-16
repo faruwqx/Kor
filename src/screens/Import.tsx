@@ -18,6 +18,7 @@ import { imperial } from '../lib/units'
 import { tableToCsv, xlsxToTable } from '../lib/xlsx'
 import { Seg, toast } from '../ui/kit'
 import { t } from '../lib/i18n'
+import type { Workout } from '../lib/types'
 
 const SOURCES = () => [
   { name: t('Strong'), how: t('Profil → Ayarlar (dişli) → Export Strong Data → CSV dosyasını kaydet.') },
@@ -27,8 +28,19 @@ const SOURCES = () => [
     name: t('Diğer uygulamalar, Excel, Google Sheets'),
     how: t('Tarih, Hareket, Kilo, Tekrar sütunlu bir tabloyu CSV olarak kaydet. Türkçe ya da İngilizce başlık olur.'),
   },
+  {
+    name: t('Motra'),
+    how: t('Motra’nın antrenman dışa aktarımı (.xlsx) olduğu gibi okunur; yürüyüş, yüzme gibi setsiz antrenmanlar da süresiyle gelir.'),
+  },
+  {
+    name: t('Kor antrenmanı'),
+    how: t('Bir antrenmanda ⋯ → Antrenmanı paylaş ile aldığın .json dosyası; tek tek antrenman taşımak için.'),
+  },
   { name: t('Kor yedeği'), how: t('Profil → Yedeği indir ile aldığın .json dosyası; mevcut verinle birleştirilir.') },
 ]
+
+/** Seçim anahtarı: plan her hesaplandığında kimlikler yenilenir, başlangıç+ad sabittir. */
+const pickKey = (w: Workout) => `${w.startedAt}|${w.name}`
 
 const year = (ts: number) => new Date(ts).getFullYear()
 const dateText = (ts: number) => `${dayMonth(ts)} ${year(ts)}`
@@ -43,6 +55,8 @@ export function Import() {
   const [unit, setUnit] = useState<Unit>(imperial() ? 'lb' : 'kg')
   const [mapping, setMapping] = useState<Mapping>({})
   const [editing, setEditing] = useState<string | null>(null)
+  /** Kullanıcının aktarmamayı seçtiği antrenmanlar (pickKey). */
+  const [off, setOff] = useState<Set<string>>(new Set())
 
   const load = (text: string, name: string) => {
     const p = parseImport(text)
@@ -52,6 +66,7 @@ export function Import() {
       return
     }
     setError('')
+    setOff(new Set())
     setFileName(name)
     setParsed(p)
     if (p.unit) setUnit(p.unit)
@@ -85,11 +100,26 @@ export function Import() {
     [s.customExercises],
   )
   const matched = summary.filter((e) => mapping[e.name] && mapping[e.name] !== 'new').length
+  const chosen = useMemo(() => (plan ? plan.workouts.filter((w) => !off.has(pickKey(w))) : []), [plan, off])
+  const chosenSets = chosen.reduce((a, w) => a + w.exercises.reduce((b, e) => b + e.sets.length, 0), 0)
+  const isKor = parsed?.format === 'kor-json' || parsed?.format === 'kor-workout'
+  const toggle = (w: Workout) =>
+    setOff((prev) => {
+      const next = new Set(prev)
+      const k = pickKey(w)
+      if (next.has(k)) next.delete(k)
+      else next.add(k)
+      return next
+    })
 
   const commit = () => {
-    if (!plan || !plan.workouts.length) return
-    actions.importData(plan.workouts, plan.newExercises)
-    toast(t('{0} antrenman aktarıldı', plan.workouts.length))
+    if (!plan || !chosen.length) return
+    const used = new Set(chosen.flatMap((w) => w.exercises.map((e) => e.exerciseId)))
+    actions.importData(
+      chosen,
+      plan.newExercises.filter((e) => used.has(e.id)),
+    )
+    toast(t('{0} antrenman aktarıldı', chosen.length))
     go('/history', { replace: true })
   }
 
@@ -200,11 +230,14 @@ export function Import() {
               {FORMAT_NAME[parsed.format]} · {fileName}
             </div>
             <div className="fig trend__fig">
-              {int(plan.workouts.length)}
+              {int(chosen.length)}
+              {chosen.length !== plan.workouts.length && (
+                <span className="unit trend__unit">/ {int(plan.workouts.length)}</span>
+              )}
               <span className="unit trend__unit">{t('antrenman')}</span>
             </div>
             <p className="row__sub num" style={{ whiteSpace: 'normal' }}>
-              {int(plan.sets)} {t('set')}
+              {int(chosenSets)} {t('set')}
               {plan.from != null && plan.to != null && ` · ${dateText(plan.from)} – ${dateText(plan.to)}`}
               {plan.duplicates > 0 && t(' · {0} antrenman zaten kayıtlı, atlanacak', plan.duplicates)}
               {parsed.skipped > 0 && t(' · {0} satır okunamadı', parsed.skipped)}
@@ -221,7 +254,42 @@ export function Import() {
             </button>
           </section>
 
-          {parsed.format !== 'kor-json' && (
+          {plan.workouts.length > 1 && (
+            <details className="card pick-list">
+              <summary className="row__title">
+                {t('Antrenmanları tek tek seç')}{' '}
+                <span className="muted num">
+                  {int(chosen.length)}/{int(plan.workouts.length)}
+                </span>
+              </summary>
+              <div className="pick-list__bar">
+                <button className="textbtn" onClick={() => setOff(new Set())}>
+                  {t('Tümünü seç')}
+                </button>
+                <button className="textbtn" onClick={() => setOff(new Set(plan.workouts.map(pickKey)))}>
+                  {t('Hiçbirini seçme')}
+                </button>
+              </div>
+              <div className="rows">
+                {[...plan.workouts].reverse().map((w) => {
+                  const n = w.exercises.reduce((a, e) => a + e.sets.length, 0)
+                  return (
+                    <label className="row checkrow" key={pickKey(w)}>
+                      <input type="checkbox" checked={!off.has(pickKey(w))} onChange={() => toggle(w)} />
+                      <span className="row__main">
+                        <span className="row__title">{w.name}</span>
+                        <span className="row__sub num">
+                          {dateText(w.startedAt)} · {n} {t('set')}
+                        </span>
+                      </span>
+                    </label>
+                  )
+                })}
+              </div>
+            </details>
+          )}
+
+          {!isKor && (
             <>
               {!parsed.unit && (
                 <>
@@ -299,12 +367,14 @@ export function Import() {
 
           <button
             className="btn btn--primary btn--block"
-            disabled={!plan.workouts.length}
+            disabled={!chosen.length}
             onClick={commit}
           >
-            {plan.workouts.length
-              ? t('{0} antrenmanı aktar', int(plan.workouts.length))
-              : t('Aktarılacak yeni antrenman yok')}
+            {chosen.length
+              ? t('{0} antrenmanı aktar', int(chosen.length))
+              : plan.workouts.length
+                ? t('Aktarılacak antrenman seç')
+                : t('Aktarılacak yeni antrenman yok')}
           </button>
           <p className="note">
             {t('Rank ve rekorlar aktarılan setlerden hemen yeniden hesaplanır. Yanlış giderse antrenmanları Geçmiş\'ten tek tek silebilirsin.')}

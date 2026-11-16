@@ -3318,6 +3318,87 @@ body {
   margin-top: 8px;
 }
 
+.pick-list summary {
+  cursor: pointer;
+}
+
+.pick-list__bar {
+  display: flex;
+  gap: 16px;
+  margin: 10px 0 4px;
+}
+
+.pick-list .rows {
+  max-height: 55vh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* Onay kutulu satır (.pick adı Picker'ın seçim noktasına ait). */
+.checkrow {
+  cursor: pointer;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.checkrow input {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  margin: 0;
+}
+
+.checkrow .row__title,
+.checkrow .row__sub {
+  display: block;
+}
+
+/* ---------- Fotoğraftan program ---------- */
+
+.section__links {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.photo-plan__img {
+  width: 100%;
+  max-height: 260px;
+  object-fit: contain;
+  border-radius: 12px;
+  background: var(--raised);
+}
+
+.photo-plan__progress {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--raised);
+  overflow: hidden;
+  margin-top: 10px;
+}
+
+.photo-plan__progress > span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  transition: width 0.2s;
+}
+
+.photo-plan__nums {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px 16px;
+}
+
+/* Etiket ile sayacı birlikte kalır: dar ekranda çift halinde alt satıra iner. */
+.photo-plan__num {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .import-cta {
   display: flex;
   gap: 14px;

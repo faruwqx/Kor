@@ -950,6 +950,50 @@ const d: Record<string, string> = {
   'Gülümseme': 'Smile',
   'Sırıtış': 'Grin',
   'Düz': 'Flat',
+  // Fotoğraftan program
+  'Fotoğraftan': 'From photo',
+  'Fotoğraftan program': 'Routine from photo',
+  'Antrenman listesinin fotoğrafını çek ya da seç; hareketler, set ve tekrarlar otomatik okunur. Fotoğraf telefondan çıkmaz.':
+    'Take or choose a photo of a workout list; exercises, sets and reps are read automatically. The photo never leaves your phone.',
+  'Başka fotoğraf': 'Another photo',
+  'Fotoğraf çek ya da seç': 'Take or choose a photo',
+  'Düz, net ve listenin tamamı görünecek şekilde': 'Straight, sharp, with the whole list visible',
+  'Seçilen antrenman listesi': 'Selected workout list',
+  'Okunuyor': 'Reading',
+  'Metin tanıma hazırlanıyor…': 'Preparing text recognition…',
+  'Liste okunuyor… {0}%': 'Reading the list… {0}%',
+  'Okunan metni gör / düzelt': 'View / fix the recognized text',
+  'Ya da listeyi buraya yaz / yapıştır': 'Or type / paste the list here',
+  'Bench press 4x8\nSquat 5x5\nLat pulldown 3 set 12 tekrar': 'Bench press 4x8\nSquat 5x5\nLat pulldown 3 sets 12 reps',
+  'Antrenman listesi metni': 'Workout list text',
+  'Yeniden çöz': 'Parse again',
+  'Bulunan hareketler': 'Exercises found',
+  'seçili': 'selected',
+  '“{0}” olarak okundu': 'Read as “{0}”',
+  'Süre (sn)': 'Time (s)',
+  'Hareketi değiştir': 'Change exercise',
+  '{0} hareketle programı kaydet': 'Save routine with {0} exercises',
+  'Kaydettikten sonra program düzenleme ekranı açılır; sırayı ve sayıları orada da değiştirebilirsin.':
+    'After saving, the routine editor opens; you can reorder and adjust the numbers there too.',
+  'Listede hareket bulunamadı. Metni düzeltip "Yeniden çöz"e dokun.':
+    'No exercises found in the list. Fix the text and tap "Parse again".',
+  'Fotoğraf okunamadı. Daha net, düz ve iyi ışıkta bir fotoğraf dene ya da listeyi aşağıya yaz.':
+    'Couldn’t read the photo. Try a sharper, straight, well-lit photo, or type the list below.',
+  // Antrenman bazlı içe/dışa aktarma
+  'Motra': 'Motra',
+  'Motra’nın antrenman dışa aktarımı (.xlsx) olduğu gibi okunur; yürüyüş, yüzme gibi setsiz antrenmanlar da süresiyle gelir.':
+    'Motra’s workout export (.xlsx) is read as is; workouts without sets, like walks and swims, come in with their duration.',
+  'Kor antrenmanı': 'Kor workout',
+  'Bir antrenmanda ⋯ → Antrenmanı paylaş ile aldığın .json dosyası; tek tek antrenman taşımak için.':
+    'The .json file from ⋯ → Share workout on a workout; for moving workouts one by one.',
+  'Antrenmanları tek tek seç': 'Choose workouts one by one',
+  'Tümünü seç': 'Select all',
+  'Hiçbirini seçme': 'Select none',
+  'Aktarılacak antrenman seç': 'Select workouts to import',
+  'Antrenman dosyası indirildi': 'Workout file downloaded',
+  'Antrenmanı paylaş': 'Share workout',
+  'Kor dosyası: başka bir telefonda İçe aktar ile birebir açılır': 'Kor file: opens exactly the same on another phone via Import',
+  'Excel, Google Sheets ve diğer uygulamalar için': 'For Excel, Google Sheets and other apps',
 }
 
 export default d

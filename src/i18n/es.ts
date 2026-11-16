@@ -950,6 +950,51 @@ const d: Record<string, string> = {
   'Gülümseme': 'Sonrisa',
   'Sırıtış': 'Mueca',
   'Düz': 'Recta',
+  // Fotoğraftan program
+  'Fotoğraftan': 'Desde foto',
+  'Fotoğraftan program': 'Rutina desde foto',
+  'Antrenman listesinin fotoğrafını çek ya da seç; hareketler, set ve tekrarlar otomatik okunur. Fotoğraf telefondan çıkmaz.':
+    'Toma o elige una foto de una lista de entrenamiento; ejercicios, series y repeticiones se leen automáticamente. La foto no sale de tu teléfono.',
+  'Başka fotoğraf': 'Otra foto',
+  'Fotoğraf çek ya da seç': 'Toma o elige una foto',
+  'Düz, net ve listenin tamamı görünecek şekilde': 'Recta, nítida y con toda la lista visible',
+  'Seçilen antrenman listesi': 'Lista de entrenamiento seleccionada',
+  'Okunuyor': 'Leyendo',
+  'Metin tanıma hazırlanıyor…': 'Preparando el reconocimiento de texto…',
+  'Liste okunuyor… {0}%': 'Leyendo la lista… {0}%',
+  'Okunan metni gör / düzelt': 'Ver / corregir el texto leído',
+  'Ya da listeyi buraya yaz / yapıştır': 'O escribe / pega la lista aquí',
+  'Bench press 4x8\nSquat 5x5\nLat pulldown 3 set 12 tekrar':
+    'Press de banca 4x8\nSentadilla 5x5\nJalón al pecho 3 series 12 reps',
+  'Antrenman listesi metni': 'Texto de la lista de entrenamiento',
+  'Yeniden çöz': 'Volver a leer',
+  'Bulunan hareketler': 'Ejercicios encontrados',
+  'seçili': 'seleccionados',
+  '“{0}” olarak okundu': 'Leído como “{0}”',
+  'Süre (sn)': 'Tiempo (s)',
+  'Hareketi değiştir': 'Cambiar ejercicio',
+  '{0} hareketle programı kaydet': 'Guardar rutina con {0} ejercicios',
+  'Kaydettikten sonra program düzenleme ekranı açılır; sırayı ve sayıları orada da değiştirebilirsin.':
+    'Al guardar se abre el editor de la rutina; allí también puedes reordenar y ajustar los números.',
+  'Listede hareket bulunamadı. Metni düzeltip "Yeniden çöz"e dokun.':
+    'No se encontraron ejercicios en la lista. Corrige el texto y toca "Volver a leer".',
+  'Fotoğraf okunamadı. Daha net, düz ve iyi ışıkta bir fotoğraf dene ya da listeyi aşağıya yaz.':
+    'No se pudo leer la foto. Prueba una foto más nítida, recta y con buena luz, o escribe la lista abajo.',
+  // Antrenman bazlı içe/dışa aktarma
+  'Motra': 'Motra',
+  'Motra’nın antrenman dışa aktarımı (.xlsx) olduğu gibi okunur; yürüyüş, yüzme gibi setsiz antrenmanlar da süresiyle gelir.':
+    'La exportación de entrenamientos de Motra (.xlsx) se lee tal cual; los entrenamientos sin series, como caminatas o natación, llegan con su duración.',
+  'Kor antrenmanı': 'Entrenamiento de Kor',
+  'Bir antrenmanda ⋯ → Antrenmanı paylaş ile aldığın .json dosyası; tek tek antrenman taşımak için.':
+    'El archivo .json que obtienes con ⋯ → Compartir entrenamiento; para mover entrenamientos uno a uno.',
+  'Antrenmanları tek tek seç': 'Elegir entrenamientos uno a uno',
+  'Tümünü seç': 'Seleccionar todo',
+  'Hiçbirini seçme': 'No seleccionar ninguno',
+  'Aktarılacak antrenman seç': 'Elige entrenamientos para importar',
+  'Antrenman dosyası indirildi': 'Archivo de entrenamiento descargado',
+  'Antrenmanı paylaş': 'Compartir entrenamiento',
+  'Kor dosyası: başka bir telefonda İçe aktar ile birebir açılır': 'Archivo de Kor: se abre igual en otro teléfono con Importar',
+  'Excel, Google Sheets ve diğer uygulamalar için': 'Para Excel, Google Sheets y otras apps',
 }
 
 export default d

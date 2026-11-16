@@ -21,6 +21,7 @@ import { Onboarding } from './screens/Onboarding'
 import { Profile } from './screens/Profile'
 import { Pushups } from './screens/Pushups'
 import { RankScreen } from './screens/Rank'
+import { PhotoPlan } from './screens/PhotoPlan'
 import { RoutineEdit } from './screens/RoutineEdit'
 import { Today } from './screens/Today'
 import { Trends } from './screens/Trends'
@@ -73,6 +74,8 @@ function resolve(seg: string[]): Route {
     }
   if (a === 'profile') return { tab: 'profile', title: t('Profil'), node: <Profile /> }
   if (a === 'premium') return { tab: 'profile', title: t('Premium'), node: <Premium /> }
+  if (a === 'routine' && b === 'photo')
+    return { tab: 'profile', title: t('Fotoğraftan program'), node: <PhotoPlan /> }
   if (a === 'routine' && b)
     return { tab: 'profile', title: t('Program'), node: <RoutineEdit key={b} id={b} /> }
   return { tab: 'today', title: t('Bugün'), node: <Today /> }
