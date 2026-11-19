@@ -295,7 +295,28 @@ export function Profile() {
       </section>
 
       <div className="section">
-        <h2>{t('Ayarlar')}</h2>
+        <h2>{t('Profil')}</h2>
+      </div>
+      <div className="card card--flush rows">
+        <button className="row" onClick={() => setNameSheet(true)}>
+          <div className="row__main">
+            <div className="row__title">{t('Ad, boy, yaş')}</div>
+            <div className="row__sub">
+              {[
+                p.name || t('Girilmedi'),
+                p.heightCm ? `${p.heightCm} cm` : null,
+                p.age ? t('{0} yaş', p.age) : null,
+              ]
+                .filter(Boolean)
+                .join(' · ')}
+            </div>
+          </div>
+          <ChevronRight className="chev" />
+        </button>
+      </div>
+
+      <div className="section">
+        <h2>{t('Antrenman')}</h2>
       </div>
       <div className="card card--flush rows">
         <div className="row">
@@ -369,6 +390,12 @@ export function Profile() {
             />
           </div>
         </div>
+      </div>
+
+      <div className="section">
+        <h2>{t('Görünüm')}</h2>
+      </div>
+      <div className="card card--flush rows">
         <div className="row" style={{ flexWrap: 'wrap' }}>
           <div className="row__main" style={{ flexBasis: '100%' }}>
             <div className="row__title">{t('Dil')}</div>
@@ -416,21 +443,6 @@ export function Profile() {
             />
           </div>
         </div>
-        <button className="row" onClick={() => setNameSheet(true)}>
-          <div className="row__main">
-            <div className="row__title">{t('Ad, boy, yaş')}</div>
-            <div className="row__sub">
-              {[
-                p.name || t('Girilmedi'),
-                p.heightCm ? `${p.heightCm} cm` : null,
-                p.age ? t('{0} yaş', p.age) : null,
-              ]
-                .filter(Boolean)
-                .join(' · ')}
-            </div>
-          </div>
-          <ChevronRight className="chev" />
-        </button>
       </div>
 
       <div className="section">

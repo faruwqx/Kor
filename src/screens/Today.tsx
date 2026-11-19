@@ -90,6 +90,10 @@ export function Today() {
         </p>
       </section>
 
+      <div className="section">
+        <h2>{t('Antrenman')}</h2>
+      </div>
+
       {!s.active && (
         <div className="quick">
           <button className="gen" onClick={() => setSplits(true)}>
@@ -126,6 +130,10 @@ export function Today() {
           </button>
         </section>
       ) : null}
+
+      <div className="section">
+        <h2>{t('İlerleme')}</h2>
+      </div>
 
       <button
         className="card card--tint"

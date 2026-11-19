@@ -1002,6 +1002,7 @@ const d: Record<string, string> = {
   'Çıkmak için dokun': 'Toca para salir',
   'Dinlenme doldu · sete başla': 'Descanso terminado · empieza la serie',
   Dinlenme: 'Descanso',
+  Görünüm: 'Apariencia',
 }
 
 export default d

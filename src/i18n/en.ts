@@ -1001,6 +1001,7 @@ const d: Record<string, string> = {
   'Çıkmak için dokun': 'Tap to exit',
   'Dinlenme doldu · sete başla': 'Rest over · start your set',
   Dinlenme: 'Rest',
+  Görünüm: 'Appearance',
 }
 
 export default d
