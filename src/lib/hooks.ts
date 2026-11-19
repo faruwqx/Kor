@@ -24,6 +24,43 @@ export function useNow(enabled = true, ms = 1000): number {
   return now
 }
 
+type WakeLockSentinel = { release(): Promise<void>; released: boolean }
+type WakeNavigator = Navigator & {
+  wakeLock?: { request(type: 'screen'): Promise<WakeLockSentinel> }
+}
+
+/**
+ * Ekranın uyumasını engeller (antrenman boyunca açık kalsın). Screen Wake Lock
+ * API'si iOS 16.4+ WKWebView ve çoğu modern tarayıcıda çalışır; yoksa sessizce
+ * atlanır. Kilit sekme gizlenince bırakılır, geri dönünce yeniden alınır.
+ */
+export function useWakeLock(enabled: boolean): void {
+  useEffect(() => {
+    if (!enabled || typeof navigator === 'undefined') return
+    const nav = navigator as WakeNavigator
+    if (!nav.wakeLock) return
+    let lock: WakeLockSentinel | null = null
+    let cancelled = false
+    const acquire = async () => {
+      try {
+        lock = await nav.wakeLock!.request('screen')
+      } catch {
+        // Pil düşükse ya da kullanıcı etkileşimi yoksa reddedilebilir; sorun değil.
+      }
+    }
+    const onVisible = () => {
+      if (!cancelled && document.visibilityState === 'visible') void acquire()
+    }
+    void acquire()
+    document.addEventListener('visibilitychange', onVisible)
+    return () => {
+      cancelled = true
+      document.removeEventListener('visibilitychange', onVisible)
+      void lock?.release().catch(() => {})
+    }
+  }, [enabled])
+}
+
 export interface Target {
   exercise: Exercise
   muscle: MuscleId

@@ -8,7 +8,10 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
-    "ios:sync": "npm run build && cap sync ios"
+    "ios:sync": "npm run build && cap sync ios",
+    "build:hardened": "npm run build && npm run harden:apply",
+    "harden:apply": "bla-agents harden dist --apply --intensity balanced --exclude \"mediapipe/**,ocr/**,sw.js,assets/vision_bundle-*,**/*.wasm\"",
+    "harden:restore": "bla-agents harden dist --restore"
   },
   "dependencies": {
     "@capacitor/core": "8.6.0",
@@ -24,6 +27,7 @@
   },
   "devDependencies": {
     "@capacitor/cli": "8.6.0",
+    "bla-agents": "^3.5.1",
     "@tesseract.js-data/eng": "^1.0.0",
     "@tesseract.js-data/tur": "^1.0.0",
     "@types/node": "^24.19.2",

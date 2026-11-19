@@ -3736,3 +3736,68 @@ body::after {
     animation: none;
   }
 }
+
+/* Always-on ekran: antrenman sırasında telefonu dik bırakınca okunacak sade koyu
+   görünüm. Gerçek siyah (OLED'de yakma/parlama düşük), büyük sayaç ve hareket adı. */
+.aod {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: #000;
+  color: #e8ebec;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: calc(env(safe-area-inset-top) + 16px) 16px calc(env(safe-area-inset-bottom) + 16px);
+  text-align: center;
+  cursor: pointer;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.aod__close {
+  position: absolute;
+  top: calc(env(safe-area-inset-top) + 10px);
+  right: 10px;
+  color: #6b7378;
+}
+
+.aod__name {
+  font-size: 22px;
+  font-weight: 600;
+  color: #c6cccf;
+  max-width: 90%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.aod__time {
+  font-size: clamp(72px, 34vw, 180px);
+  line-height: 1;
+  color: var(--accent);
+  letter-spacing: 0.01em;
+}
+
+.aod--over .aod__time {
+  color: var(--negative);
+}
+
+.aod__label {
+  font-size: 16px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #7c8286;
+}
+
+.aod--over .aod__label {
+  color: var(--negative);
+}
+
+.aod__hint {
+  margin-top: 18px;
+  font-size: 13px;
+  color: #4c5255;
+}

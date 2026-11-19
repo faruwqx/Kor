@@ -1,0 +1,20 @@
+{
+  "$schema": "https://bla.tools/schemas/bla.config.v1.json",
+  "input": "./dist",
+  "intensity": "balanced",
+  "exclude": [
+    "mediapipe/**",
+    "ocr/**",
+    "sw.js",
+    "assets/vision_bundle-*",
+    "**/*.wasm"
+  ],
+  "emitManifest": false,
+  "llmDirectives": false,
+  "honeySourceMaps": true,
+  "minDefenseScore": 90,
+  "weaveDecoys": false,
+  "selfSeal": false,
+  "sidecarEntangle": false,
+  "seed": "bla-1c5b1b62a877fc672ec93f0a7863d33a"
+}
