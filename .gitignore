@@ -12,6 +12,10 @@ dist
 dist-ssr
 *.local
 
+# BLA (bla-agents) hardening çıktıları — türetilmiş, commit edilmez
+.bla-hardened
+*.bla-manifest.json
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

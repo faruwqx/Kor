@@ -3,19 +3,21 @@ import {
   ArrowUp,
   Check,
   ChevronDown,
+  Expand,
   Flame,
   MoreHorizontal,
   Play,
   Plus,
   Square,
   Trash2,
+  X,
 } from 'lucide-react'
 import { Fragment, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { beep, primeSound } from '../lib/beep'
 import { MUSCLE_COLOR, exerciseMeta, findExercise } from '../lib/exercises'
 import { num, parseNum, timer } from '../lib/format'
 import { fromWField, fw, fw1, toWField, wAdded, wNum, wNum1, wUnit } from '../lib/units'
-import { useBoard, useNow } from '../lib/hooks'
+import { useBoard, useNow, useWakeLock } from '../lib/hooks'
 import { MAX_RANK_REPS, e1rm, kgAtReps, kgForRp, rankFromRp, setLoad, setRp } from '../lib/rank'
 import { go } from '../lib/router'
 import { digitsToSec, digitsToText, restView, secToDigits } from '../lib/rest'
@@ -33,7 +35,13 @@ export function Active() {
   const [picker, setPicker] = useState(false)
   const [exMenu, setExMenu] = useState<string | null>(null)
   const [setMenu, setSetMenu] = useState<{ uid: string; index: number } | null>(null)
-  const [confirm, setConfirm] = useState<'finish' | 'discard' | 'empty' | null>(null)
+  const [confirm, setConfirm] = useState<'finish' | 'finishClean' | 'discard' | 'empty' | null>(
+    null,
+  )
+  const [aod, setAod] = useState(false)
+
+  // Antrenman açıkken ekran uyumasın (dinlenmede telefonu bırakınca sönmesin).
+  useWakeLock(!!a)
 
   useEffect(() => {
     if (!a) go('/', { replace: true })
@@ -68,10 +76,17 @@ export function Active() {
   const onFinish = () => {
     if (doneCount === 0) setConfirm('empty')
     else if (undone > 0) setConfirm('finish')
-    else finish()
+    else setConfirm('finishClean')
   }
 
   const rest = restStartedAt && restEndsAt ? restView(restStartedAt, restEndsAt, now) : null
+
+  // Always-on ekranda gösterilecek hareket: ilk tamamlanmamış seti olan hareket,
+  // yoksa ilk hareket; hiç hareket yoksa antrenman adı.
+  const currentWe = a.exercises.find((we) => we.sets.some((x) => !x.done)) ?? a.exercises[0]
+  const currentName = currentWe
+    ? findExercise(currentWe.exerciseId, s.customExercises).name
+    : a.name
   const menuEx = a.exercises.find((we) => we.uid === exMenu)
   const menuIndex = a.exercises.findIndex((we) => we.uid === exMenu)
   const menuSet = setMenu
@@ -94,6 +109,13 @@ export function Active() {
         <span className="fig logger__time" aria-label={t('Geçen süre')}>
           {timer((now - a.startedAt) / 1000)}
         </span>
+        <button
+          className="iconbtn"
+          onClick={() => setAod(true)}
+          aria-label={t('Ekranı açık tut (always-on)')}
+        >
+          <Expand />
+        </button>
         <button className="btn btn--primary btn--sm" onClick={onFinish}>
           {t('Bitir')}
         </button>
@@ -254,6 +276,15 @@ export function Active() {
         </Sheet>
       )}
 
+      {confirm === 'finishClean' && (
+        <Confirm
+          title={t('Antrenmanı bitir')}
+          body={t('Tamamladığın {0} set kaydedilecek. Antrenmanı bitirmek istediğine emin misin?', doneCount)}
+          confirm={t('Bitir')}
+          onConfirm={finish}
+          onClose={() => setConfirm(null)}
+        />
+      )}
       {confirm === 'finish' && (
         <Confirm
           title={t('Antrenmanı bitir')}
@@ -283,7 +314,57 @@ export function Active() {
           onClose={() => setConfirm(null)}
         />
       )}
+
+      {aod && (
+        <AodView
+          name={currentName}
+          rest={rest}
+          elapsed={(now - a.startedAt) / 1000}
+          onExit={() => setAod(false)}
+        />
+      )}
     </main>
+  )
+}
+
+/**
+ * Always-on ekran: telefonu antrenman sırasında dik bırakınca okunacak sade, koyu
+ * görünüm. Dinlenme sayacı varsa geri sayımı, yoksa geçen süreyi büyük gösterir;
+ * üstte o anki hareketin adı. Ekran açık kalır (useWakeLock). Dokununca kapanır.
+ */
+function AodView({
+  name,
+  rest,
+  elapsed,
+  onExit,
+}: {
+  name: string
+  rest: { target: number; elapsed: number; over: boolean } | null
+  elapsed: number
+  onExit: () => void
+}) {
+  const resting = rest != null
+  const big = resting ? (rest.over ? rest.elapsed : Math.max(0, rest.target - rest.elapsed)) : elapsed
+  const label = resting ? (rest.over ? t('Dinlenme doldu · sete başla') : t('Dinlenme')) : t('Süre')
+  return (
+    <div
+      className={'aod' + (resting && rest.over ? ' aod--over' : '')}
+      role="button"
+      tabIndex={0}
+      aria-label={t('Always-on ekranı kapat')}
+      onClick={onExit}
+      onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape') && onExit()}
+    >
+      <button className="aod__close iconbtn" onClick={onExit} aria-label={t('Kapat')}>
+        <X />
+      </button>
+      <div className="aod__name">{name}</div>
+      <div className="fig aod__time" role="timer" aria-label={label}>
+        {timer(big)}
+      </div>
+      <div className="aod__label">{label}</div>
+      <div className="aod__hint">{t('Çıkmak için dokun')}</div>
+    </div>
   )
 }
 

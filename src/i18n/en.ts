@@ -994,6 +994,13 @@ const d: Record<string, string> = {
   'Antrenmanı paylaş': 'Share workout',
   'Kor dosyası: başka bir telefonda İçe aktar ile birebir açılır': 'Kor file: opens exactly the same on another phone via Import',
   'Excel, Google Sheets ve diğer uygulamalar için': 'For Excel, Google Sheets and other apps',
+  'Tamamladığın {0} set kaydedilecek. Antrenmanı bitirmek istediğine emin misin?':
+    'Your {0} completed sets will be saved. Are you sure you want to finish the workout?',
+  'Ekranı açık tut (always-on)': 'Keep screen on (always-on)',
+  'Always-on ekranı kapat': 'Close always-on screen',
+  'Çıkmak için dokun': 'Tap to exit',
+  'Dinlenme doldu · sete başla': 'Rest over · start your set',
+  Dinlenme: 'Rest',
 }
 
 export default d
