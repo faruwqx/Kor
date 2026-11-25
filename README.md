@@ -38,25 +38,6 @@ The standards are this app's own table; they are not a comparison with other use
 
 Data is kept in `localStorage` under the `kor:v1` key. A JSON backup is exported and restored from the Profile screen.
 
-## Account, backup and Premium
-
-The account layer runs on Supabase and is optional: with no keys in `.env.local`, the app works on-device only and the account section is hidden.
-
-Setup:
-
-1. Create a free project at [supabase.com](https://supabase.com).
-2. In the SQL Editor, run the full `supabase/schema.sql` file.
-3. Copy `.env.example` to `.env.local`; fill in the project URL and the `anon` key from Project Settings > API. Never put the `service_role` key in this file or in the code.
-4. Authentication > URL Configuration: add the app's address to Site URL and Redirect URLs (in development, `http://localhost:5173`).
-5. Authentication > Providers:
-   - **Email** is enabled by default.
-   - **Google**: create an OAuth client in the Google Cloud Console and enter the client ID and secret in Supabase. It is free.
-   - **Apple**: requires an Apple Developer membership. After setting it up, set `VITE_AUTH_APPLE=1` in `.env.local`; until then the button is hidden.
-
-Security: the `anon` key in the browser is public. The data is protected by the row-level security rules in `schema.sql`: everyone reads and writes only their own row, and the subscription table cannot be written from the browser.
-
-Sync: all data is stored as a single document per user in the `user_data` table. If two devices change it at the same time, records are merged; because deletions are not tracked, a workout deleted on one device can come back from the other. The rules are in `src/lib/cloud-core.ts`, along with their tests.
-
 Premium: the entitlement is read from the `subscriptions` table. A 7-day trial starts without a card via `start_trial()`. **Premium is currently free for everyone during launch — every feature is unlocked.** This is controlled by the `PREMIUM_FOR_EVERYONE` flag in `src/lib/cloud-core.ts`; set it to `false` to return to normal subscription behavior. Payment is not connected yet: while `VITE_CHECKOUT_URL` is empty, the purchase button says so. When a payment provider is connected, its webhook must update the `subscriptions` row with the `service_role` key (on the server).
 
 Locks are in the interface: because analysis is computed from on-device data, a determined user can get past a lock. What is enforced on the server is the entitlement itself.
