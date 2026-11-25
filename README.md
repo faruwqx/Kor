@@ -85,3 +85,15 @@ Pricing lives in `src/lib/pricing.ts` and is for display only; the same table mu
 The move frames under `public/moves/` were taken from the public-domain (Unlicense)
 [free-exercise-db](https://github.com/yuhonas/free-exercise-db) dataset and downscaled.
 Each move has a start and end frame; they play as a loop on the move page.
+
+## Buy me a coffee ☕
+
+Kor is free and open source. If it helps your training and you'd like to support development, a small crypto tip is hugely appreciated — thank you! 🙏
+
+| Coin | Address |
+|---|---|
+| **Bitcoin (BTC)** | `16m6tnxdZzrCpPM251zkuzdp8Wmww5tFkk` |
+| **Ethereum (ERC-20)** | `0x09924e413d83ca82bdd1055568f4136f9c2e8df7` |
+| **Solana (SOL)** | `3qAWLW4yKqN5mKwYy5T5MoLeogFdDL1UC9QRR6aYDdHP` |
+
+> Always double-check the address in your wallet before sending.
