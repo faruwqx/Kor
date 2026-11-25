@@ -115,12 +115,26 @@ export interface Subscription {
   current_period_end: string
 }
 
+/**
+ * GEÇİCİ: lansman döneminde Premium herkese açık. Normale dönmek için bu bayrağı
+ * false yap (tek satır) — altındaki gerçek abonelik mantığı olduğu gibi duruyor.
+ */
+export const PREMIUM_FOR_EVERYONE = true
+
 /** Deneme, etkin abonelik veya iptal edilmiş ama süresi dolmamış abonelik Premium'dur. */
-export function isPremium(sub: Subscription | null | undefined, now: number = Date.now()): boolean {
+export function hasActiveSubscription(
+  sub: Subscription | null | undefined,
+  now: number = Date.now(),
+): boolean {
   if (!sub) return false
   if (sub.status !== 'trialing' && sub.status !== 'active' && sub.status !== 'canceled') return false
   const end = Date.parse(sub.current_period_end)
   return Number.isFinite(end) && end > now
+}
+
+/** Premium hakkı. Lansman döneminde {@link PREMIUM_FOR_EVERYONE} ile herkese açık. */
+export function isPremium(sub: Subscription | null | undefined, now: number = Date.now()): boolean {
+  return PREMIUM_FOR_EVERYONE || hasActiveSubscription(sub, now)
 }
 
 /** Ücretsiz planda grafiklerin geriye baktığı süre (gün). */

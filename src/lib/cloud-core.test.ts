@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import {
+  hasActiveSubscription,
   isPremium,
+  PREMIUM_FOR_EVERYONE,
   mergeDocs,
   parseDoc,
   planSync,
@@ -110,24 +112,37 @@ describe('planSync', () => {
   })
 })
 
-describe('isPremium', () => {
+describe('hasActiveSubscription', () => {
   const now = Date.parse('2026-11-12T12:00:00Z')
   const sub = (status: string, end: string) =>
-    ({ status, plan: null, trial_used: true, current_period_end: end }) as Parameters<typeof isPremium>[0]
+    ({ status, plan: null, trial_used: true, current_period_end: end }) as Parameters<
+      typeof hasActiveSubscription
+    >[0]
 
   it('aboneliği olmayan ücretsizdir', () => {
-    expect(isPremium(null, now)).toBe(false)
+    expect(hasActiveSubscription(null, now)).toBe(false)
   })
   it('süresi dolmamış deneme ve abonelik Premium', () => {
-    expect(isPremium(sub('trialing', '2026-11-19T12:00:00Z'), now)).toBe(true)
-    expect(isPremium(sub('active', '2026-12-12T12:00:00Z'), now)).toBe(true)
-    expect(isPremium(sub('canceled', '2026-11-13T12:00:00Z'), now)).toBe(true)
+    expect(hasActiveSubscription(sub('trialing', '2026-11-19T12:00:00Z'), now)).toBe(true)
+    expect(hasActiveSubscription(sub('active', '2026-12-12T12:00:00Z'), now)).toBe(true)
+    expect(hasActiveSubscription(sub('canceled', '2026-11-13T12:00:00Z'), now)).toBe(true)
   })
   it('süresi dolmuş ya da ödenmemiş abonelik Premium değil', () => {
-    expect(isPremium(sub('trialing', '2026-11-12T11:59:00Z'), now)).toBe(false)
-    expect(isPremium(sub('expired', '2026-12-12T12:00:00Z'), now)).toBe(false)
-    expect(isPremium(sub('past_due', '2026-12-12T12:00:00Z'), now)).toBe(false)
-    expect(isPremium(sub('active', 'bozuk'), now)).toBe(false)
+    expect(hasActiveSubscription(sub('trialing', '2026-11-12T11:59:00Z'), now)).toBe(false)
+    expect(hasActiveSubscription(sub('expired', '2026-12-12T12:00:00Z'), now)).toBe(false)
+    expect(hasActiveSubscription(sub('past_due', '2026-12-12T12:00:00Z'), now)).toBe(false)
+    expect(hasActiveSubscription(sub('active', 'bozuk'), now)).toBe(false)
+  })
+})
+
+describe('isPremium', () => {
+  it('lansman bayrağı açıkken herkes Premium', () => {
+    // PREMIUM_FOR_EVERYONE kapatıldığında bu test gerçek abonelik mantığına döner.
+    if (PREMIUM_FOR_EVERYONE) {
+      expect(isPremium(null)).toBe(true)
+    } else {
+      expect(isPremium(null)).toBe(false)
+    }
   })
 })
 
