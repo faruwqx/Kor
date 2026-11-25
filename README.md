@@ -1,78 +1,70 @@
 # Kor
 
-Kuvvet antrenmanı takibi ve kas grubu başına rank. Telefona kurulabilen, çevrimdışı çalışan bir web uygulaması (PWA). Veri cihazda durur; isteğe bağlı hesapla buluta yedeklenir.
+Strength-training tracker with a rank for each muscle group. A web app (PWA) you can install on your phone and use offline. Your data stays on the device; optionally it is backed up to the cloud with an account.
 
-## Çalıştırma
+## Running
 
 ```
 npm install
-npm run dev        # geliştirme, http://localhost:5173
-npm run build      # derleme, çıktı dist/ klasörüne
-npm run preview    # derlenmiş sürüm, http://localhost:4173
-npx vitest run     # testler
+npm run dev        # development, http://localhost:5173
+npm run build      # build, output in the dist/ folder
+npm run preview    # built version, http://localhost:4173
+npx vitest run     # tests
 ```
 
-`?demo=1` ile açılırsa (örneğin `http://localhost:4173/?demo=1`) ve henüz kurulum yapılmamışsa, 14 haftalık örnek veriyle başlar. Örnek veri Profil ekranından silinir.
+If opened with `?demo=1` (for example `http://localhost:4173/?demo=1`) and nothing has been set up yet, it starts with 14 weeks of sample data. Sample data is removed from the Profile screen.
 
-## Telefona kurma
+## Installing on a phone
 
-`dist/` klasörü statik dosyalardan oluşur; HTTPS sunan herhangi bir yere (Netlify, Vercel, GitHub Pages, Cloudflare Pages) yüklenebilir. Telefonda adresi açıp tarayıcı menüsünden "Ana ekrana ekle" seçilir. Servis çalışanı yalnızca HTTPS veya `localhost` üzerinde çalışır; ev ağındaki `http://192.168...` adresinde uygulama açılır ama çevrimdışı çalışmaz ve kurulamaz.
+The `dist/` folder is made of static files; it can be uploaded anywhere that serves over HTTPS (Netlify, Vercel, GitHub Pages, Cloudflare Pages). On the phone, open the address and choose "Add to Home Screen" from the browser menu. The service worker only runs over HTTPS or `localhost`; at a home-network `http://192.168...` address the app opens but does not work offline and cannot be installed.
 
-## Rank nasıl hesaplanır
+## How rank is calculated
 
-1. Her çalışma setinden tahmini tek tekrar maksimumu (1TM) çıkar: `kilo × (1 + tekrar / 30)`. 12 tekrarın üstü ve ısınma setleri sayılmaz.
-2. 1TM vücut ağırlığına bölünür. Barfiks ve dips gibi hareketlerde yük, vücut ağırlığı artı eklenen kilodur.
-3. Oran, hareketin kendi standardında 0 ile 2100 RP arasına oturur. Ölçek doğrusal değildir (`RANK_CURVE = 0,7`, `src/lib/rank.ts`): alt ve orta kademeler daha erken açılır, Kor eşiği değişmez. Standartlar `src/lib/exercises.ts` içindedir (`start` merdivenin dibi, `elite` Kor eşiği). Kadınlarda üst vücut 0,60, alt vücut 0,75 ile çarpılır.
-4. Sekiz kademe vardır: Kömür, Demir, Bronz, Gümüş, Altın, Platin, Elmas, Kor. İlk yedisi üçer basamaktır, her basamak 100 RP. 2100 RP ve üstü Kor'dur.
-5. Kas grubunun rank'ini o grubun en yüksek RP'li hareketi belirler. Genel rank, sıralanmış grupların ortalamasıdır ve en az dört grup ister.
+1. From each working set, an estimated one-rep max (1RM) is derived: `weight × (1 + reps / 30)`. Sets above 12 reps and warm-up sets do not count.
+2. The 1RM is divided by body weight. For moves like pull-ups and dips, the load is body weight plus added weight.
+3. The ratio falls between 0 and 2100 RP against the move's own standard. The scale is not linear (`RANK_CURVE = 0.7`, `src/lib/rank.ts`): lower and middle tiers open earlier, while the Kor threshold stays fixed. Standards are in `src/lib/exercises.ts` (`start` is the bottom of the ladder, `elite` is the Kor threshold). For women, upper body is multiplied by 0.60 and lower body by 0.75.
+4. There are eight tiers: Coal, Iron, Bronze, Silver, Gold, Platinum, Diamond, Kor. The first seven have three steps each, and each step is 100 RP. 2100 RP and above is Kor.
+5. A muscle group's rank is set by that group's highest-RP move. The overall rank is the average of ranked groups and requires at least four groups.
 
-Standartlar bu uygulamanın kendi tablosudur; başka kullanıcılarla karşılaştırma veya yüzdelik dilim değildir. Standardı olmayan hareketler (çoğu makine ve kullanıcının eklediği hareketler) kaydedilir ama rank'e sayılmaz.
+The standards are this app's own table; they are not a comparison with other users or a percentile. Moves without a standard (most machines and user-added moves) are recorded but do not count toward rank.
 
-## Yapı
+## Structure
 
-- `src/lib/` — mantık: `rank.ts` (rank hesabı), `stats.ts` (hacim, rekor, seri), `store.ts` (durum ve `localStorage`), `exercises.ts` (hareket kütüphanesi), `demo.ts` (örnek veri), `cloud.ts` ve `cloud-core.ts` (hesap, yedek, Premium hakkı), `pricing.ts` (bölgesel fiyat).
-- `supabase/schema.sql` — veritabanı tabloları ve güvenlik kuralları.
-- `src/screens/` — ekranlar: Bugün, antrenman kaydı, Rank, kas grubu, hareket, Geçmiş, antrenman özeti, Profil, program düzenleme.
-- `src/ui/` — amblem, grafikler, ortak bileşenler.
-- `public/sw.js` — çevrimdışı önbellek.
+- `src/lib/` — logic: `rank.ts` (rank calculation), `stats.ts` (volume, records, streak), `store.ts` (state and `localStorage`), `exercises.ts` (move library), `demo.ts` (sample data), `cloud.ts` and `cloud-core.ts` (account, backup, Premium entitlement), `pricing.ts` (regional pricing).
+- `supabase/schema.sql` — database tables and security rules.
+- `src/screens/` — screens: Today, workout logging, Rank, muscle group, move, History, workout summary, Profile, routine editing.
+- `src/ui/` — logo, charts, shared components.
+- `public/sw.js` — offline cache.
 
-Veri `localStorage` içinde `kor:v1` anahtarında tutulur. Profil ekranından JSON yedeği alınır ve geri yüklenir.
+Data is kept in `localStorage` under the `kor:v1` key. A JSON backup is exported and restored from the Profile screen.
 
-## Hesap, yedek ve Premium
+## Account, backup and Premium
 
-Hesap katmanı Supabase üzerinde çalışır ve isteğe bağlıdır: `.env.local` içinde anahtar yoksa uygulama yalnızca cihazda çalışır, hesap bölümü görünmez.
+The account layer runs on Supabase and is optional: with no keys in `.env.local`, the app works on-device only and the account section is hidden.
 
-Kurulum:
+Setup:
 
-1. [supabase.com](https://supabase.com) üzerinde ücretsiz bir proje aç.
-2. SQL Editor'de `supabase/schema.sql` dosyasının tamamını çalıştır.
-3. `.env.example` dosyasını `.env.local` adıyla kopyala; Project Settings > API sayfasındaki proje adresini ve `anon` anahtarını yaz. `service_role` anahtarını hiçbir zaman bu dosyaya ya da koda koyma.
-4. Authentication > URL Configuration: Site URL ve Redirect URLs alanlarına uygulamanın adresini ekle (geliştirmede `http://localhost:5173`).
+1. Create a free project at [supabase.com](https://supabase.com).
+2. In the SQL Editor, run the full `supabase/schema.sql` file.
+3. Copy `.env.example` to `.env.local`; fill in the project URL and the `anon` key from Project Settings > API. Never put the `service_role` key in this file or in the code.
+4. Authentication > URL Configuration: add the app's address to Site URL and Redirect URLs (in development, `http://localhost:5173`).
 5. Authentication > Providers:
-   - **Email** varsayılan olarak açıktır.
-   - **Google**: Google Cloud Console'da bir OAuth istemcisi oluştur, istemci kimliğini ve sırrını Supabase'e gir. Ücretsizdir.
-   - **Apple**: Apple Developer üyeliği (yıllık 99 $) gerekir. Kurduktan sonra `.env.local` içinde `VITE_AUTH_APPLE=1` yap; o zamana kadar düğme gizlidir.
+   - **Email** is enabled by default.
+   - **Google**: create an OAuth client in the Google Cloud Console and enter the client ID and secret in Supabase. It is free.
+   - **Apple**: requires an Apple Developer membership. After setting it up, set `VITE_AUTH_APPLE=1` in `.env.local`; until then the button is hidden.
 
-Güvenlik: tarayıcıdaki `anon` anahtarı herkese açıktır. Veriyi `schema.sql` içindeki satır düzeyi güvenlik kuralları korur: herkes yalnızca kendi satırını okur ve yazar, abonelik tablosu tarayıcıdan yazılamaz.
+Security: the `anon` key in the browser is public. The data is protected by the row-level security rules in `schema.sql`: everyone reads and writes only their own row, and the subscription table cannot be written from the browser.
 
-Eşitleme: tüm veri kullanıcı başına tek belge olarak `user_data` tablosunda durur. İki cihaz aynı anda değiştirirse kayıtlar birleştirilir; silme bilgisi taşınmadığı için bir cihazda silinen antrenman öbüründen geri gelebilir. Kurallar `src/lib/cloud-core.ts` içinde, testleriyle birlikte.
+Sync: all data is stored as a single document per user in the `user_data` table. If two devices change it at the same time, records are merged; because deletions are not tracked, a workout deleted on one device can come back from the other. The rules are in `src/lib/cloud-core.ts`, along with their tests.
 
-Premium: hak `subscriptions` tablosundan okunur. 7 günlük deneme `start_trial()` ile kartsız başlar. Ödeme henüz bağlı değil: `VITE_CHECKOUT_URL` boşken satın alma düğmesi bunu söyler. Ödeme sağlayıcısı bağlanınca, webhook'u `subscriptions` satırını `service_role` anahtarıyla (sunucuda) güncellemelidir.
+Premium: the entitlement is read from the `subscriptions` table. A 7-day trial starts without a card via `start_trial()`. **Premium is currently free for everyone during launch — every feature is unlocked.** This is controlled by the `PREMIUM_FOR_EVERYONE` flag in `src/lib/cloud-core.ts`; set it to `false` to return to normal subscription behavior. Payment is not connected yet: while `VITE_CHECKOUT_URL` is empty, the purchase button says so. When a payment provider is connected, its webhook must update the `subscriptions` row with the `service_role` key (on the server).
 
-Kilitler arayüzdedir: analiz cihazdaki veriden hesaplandığı için kararlı bir kullanıcı kilidi aşabilir. Sunucuda zorlanan şey hakkın kendisidir.
+Locks are in the interface: because analysis is computed from on-device data, a determined user can get past a lock. What is enforced on the server is the entitlement itself.
 
-Fiyatlar `src/lib/pricing.ts` içindedir ve yalnızca gösterim içindir; aynı tablo ödeme sağlayıcısında da tanımlanmalıdır.
+Pricing lives in `src/lib/pricing.ts` and is for display only; the same table must also be defined in the payment provider. While Premium is free for everyone, these prices are not shown in the app.
 
-| Katman | Ülkeler | Aylık | Yıllık |
-|---|---|---|---|
-| `tr` | Türkiye | ₺99 | ₺699 |
-| `high` | AB/AEA, İsviçre, Birleşik Krallık, ABD ve diğer yüksek gelirli ülkeler | 7,99 € / 6,99 £ / 7,99 $ | 49,99 € / 44,99 £ / 49,99 $ |
-| `low` | Geri kalan herkes | 1,99 $ | 14,99 $ |
+## Exercise frames
 
-`low` katmanı Türkiye fiyatının dolar karşılığıdır (yaklaşık 48 TL/USD); kur belirgin değişirse güncellenmeli.
-
-## Yapılış kareleri
-
-`public/moves/` altındaki hareket kareleri, kamu malı (Unlicense) olan
-[free-exercise-db](https://github.com/yuhonas/free-exercise-db) veri setinden alınıp küçültüldü.
-Her hareket için başlangıç ve bitiş karesi var; hareket sayfasında döngü olarak oynar.
+The move frames under `public/moves/` were taken from the public-domain (Unlicense)
+[free-exercise-db](https://github.com/yuhonas/free-exercise-db) dataset and downscaled.
+Each move has a start and end frame; they play as a loop on the move page.

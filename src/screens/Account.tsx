@@ -18,7 +18,7 @@ import {
   useCloud,
   usePremium,
 } from '../lib/cloud'
-import { FREE_HISTORY_DAYS, FREE_ROUTINES } from '../lib/cloud-core'
+import { FREE_HISTORY_DAYS, FREE_ROUTINES, PREMIUM_FOR_EVERYONE } from '../lib/cloud-core'
 import {
   TRIAL_DAYS,
   detectCountry,
@@ -285,7 +285,7 @@ export function AccountSection() {
         <div className="section">
           <h2>{t('Premium')}</h2>
         </div>
-        {premiumCard(t('Paketlere ve fiyatlara bak'))}
+        {premiumCard(PREMIUM_FOR_EVERYONE ? t('Şu an herkese açık') : t('Paketlere ve fiyatlara bak'))}
       </>
     )
 
@@ -295,7 +295,9 @@ export function AccountSection() {
         <div className="section">
           <h2>{t('Premium')}</h2>
         </div>
-        {premiumCard(t('{0} gün ücretsiz dene', TRIAL_DAYS))}
+        {premiumCard(
+          PREMIUM_FOR_EVERYONE ? t('Şu an herkese açık') : t('{0} gün ücretsiz dene', TRIAL_DAYS),
+        )}
         <div className="section">
           <h2>{t('Hesap')}</h2>
         </div>
@@ -341,11 +343,13 @@ export function AccountSection() {
           <div className="row__main">
             <div>{t('Premium')}</div>
             <div className="row__sub">
-              {premium
-                ? c.sub!.status === 'trialing'
-                  ? t('Deneme {0} günü biter', longDate(c.sub!.current_period_end))
-                  : t('Etkin, {0} tarihine kadar', longDate(c.sub!.current_period_end))
-                : t('Ücretsiz plandasın')}
+              {PREMIUM_FOR_EVERYONE
+                ? t('Şu an herkese açık')
+                : premium
+                  ? c.sub!.status === 'trialing'
+                    ? t('Deneme {0} günü biter', longDate(c.sub!.current_period_end))
+                    : t('Etkin, {0} tarihine kadar', longDate(c.sub!.current_period_end))
+                  : t('Ücretsiz plandasın')}
             </div>
           </div>
           <ChevronRight className="chev" />
@@ -437,63 +441,77 @@ export function Premium() {
         </div>
       </header>
 
-      {premium && (
+      {PREMIUM_FOR_EVERYONE ? (
         <div className="card">
-          <h2>{c.sub!.status === 'trialing' ? t('Deneme sürüyor') : t('Premium etkin')}</h2>
+          <h2>{t('Premium etkin')}</h2>
           <p className="row__sub" style={{ whiteSpace: 'normal', marginTop: 4 }}>
-            {c.sub!.status === 'trialing'
-              ? t('{0} günü biter. Devam etmek için bir paket seç.', longDate(c.sub!.current_period_end))
-              : t('{0} tarihine kadar geçerli.', longDate(c.sub!.current_period_end))}
+            {t('Premium şu an herkese açık; tüm özellikler açık. Keyfini çıkar.')}
           </p>
         </div>
-      )}
-
-      <div className="plans" role="group" aria-label={t('Paket')}>
-        <button className="plan" aria-pressed={plan === 'yearly'} onClick={() => setPlan('yearly')}>
-          <span className="plan__name">
-            {t('Yıllık')} <span className="plan__tag">%{saving} {t('indirim')}</span>
-          </span>
-          <span className="fig plan__price">{formatPrice(price.yearly, price.currency)}</span>
-          <span className="plan__sub">{t('ayda')} {formatPrice(price.yearly / 12, price.currency)}</span>
-        </button>
-        <button className="plan" aria-pressed={plan === 'monthly'} onClick={() => setPlan('monthly')}>
-          <span className="plan__name">{t('Aylık')}</span>
-          <span className="fig plan__price">{formatPrice(price.monthly, price.currency)}</span>
-          <span className="plan__sub">{t('her ay')}</span>
-        </button>
-      </div>
-
-      {!cloudEnabled ? (
-        <p className="note">{t('Hesap ve ödeme bu sürümde henüz açık değil.')}</p>
-      ) : !c.user ? (
-        <button className="btn btn--primary btn--block" onClick={() => setAuth(true)} disabled={!c.ready}>
-          {t('Giriş yap ve')} {TRIAL_DAYS} {t('gün ücretsiz dene')}
-        </button>
       ) : (
-        <div className="authbtns">
-          {trialLeft && (
-            <button className="btn btn--primary btn--block" onClick={trial} disabled={busy}>
-              {TRIAL_DAYS} {t('gün ücretsiz dene')}
-            </button>
-          )}
-          {(!premium || c.sub!.status === 'trialing') && (
-            <button
-              className={'btn btn--block ' + (trialLeft ? 'btn--ghost' : 'btn--primary')}
-              onClick={buy}
-            >
-              {plan === 'yearly' ? t('Yıllık pakete geç') : t('Aylık pakete geç')}
-            </button>
-          )}
-        </div>
+        premium &&
+        c.sub && (
+          <div className="card">
+            <h2>{c.sub.status === 'trialing' ? t('Deneme sürüyor') : t('Premium etkin')}</h2>
+            <p className="row__sub" style={{ whiteSpace: 'normal', marginTop: 4 }}>
+              {c.sub.status === 'trialing'
+                ? t('{0} günü biter. Devam etmek için bir paket seç.', longDate(c.sub.current_period_end))
+                : t('{0} tarihine kadar geçerli.', longDate(c.sub.current_period_end))}
+            </p>
+          </div>
+        )
       )}
-      <LegalLinks
-        lead={t('Denemeyi başlatarak ya da satın alarak')}
-        ids={['subscription', 'terms']}
-        tail={t('metinlerini kabul etmiş olursun.')}
-      />
-      <p className="note">
-        {t('Deneme için kart gerekmez ve kendiliğinden ücrete dönmez. Fiyat bölgene göre gösterilir; kesin tutar ödeme sayfasında, fatura ülkene göre belirlenir.')}
-      </p>
+
+      {!PREMIUM_FOR_EVERYONE && (
+        <>
+          <div className="plans" role="group" aria-label={t('Paket')}>
+            <button className="plan" aria-pressed={plan === 'yearly'} onClick={() => setPlan('yearly')}>
+              <span className="plan__name">
+                {t('Yıllık')} <span className="plan__tag">%{saving} {t('indirim')}</span>
+              </span>
+              <span className="fig plan__price">{formatPrice(price.yearly, price.currency)}</span>
+              <span className="plan__sub">{t('ayda')} {formatPrice(price.yearly / 12, price.currency)}</span>
+            </button>
+            <button className="plan" aria-pressed={plan === 'monthly'} onClick={() => setPlan('monthly')}>
+              <span className="plan__name">{t('Aylık')}</span>
+              <span className="fig plan__price">{formatPrice(price.monthly, price.currency)}</span>
+              <span className="plan__sub">{t('her ay')}</span>
+            </button>
+          </div>
+
+          {!cloudEnabled ? (
+            <p className="note">{t('Hesap ve ödeme bu sürümde henüz açık değil.')}</p>
+          ) : !c.user ? (
+            <button className="btn btn--primary btn--block" onClick={() => setAuth(true)} disabled={!c.ready}>
+              {t('Giriş yap ve')} {TRIAL_DAYS} {t('gün ücretsiz dene')}
+            </button>
+          ) : (
+            <div className="authbtns">
+              {trialLeft && (
+                <button className="btn btn--primary btn--block" onClick={trial} disabled={busy}>
+                  {TRIAL_DAYS} {t('gün ücretsiz dene')}
+                </button>
+              )}
+              {(!premium || (c.sub && c.sub.status === 'trialing')) && (
+                <button
+                  className={'btn btn--block ' + (trialLeft ? 'btn--ghost' : 'btn--primary')}
+                  onClick={buy}
+                >
+                  {plan === 'yearly' ? t('Yıllık pakete geç') : t('Aylık pakete geç')}
+                </button>
+              )}
+            </div>
+          )}
+          <LegalLinks
+            lead={t('Denemeyi başlatarak ya da satın alarak')}
+            ids={['subscription', 'terms']}
+            tail={t('metinlerini kabul etmiş olursun.')}
+          />
+          <p className="note">
+            {t('Deneme için kart gerekmez ve kendiliğinden ücrete dönmez. Fiyat bölgene göre gösterilir; kesin tutar ödeme sayfasında, fatura ülkene göre belirlenir.')}
+          </p>
+        </>
+      )}
 
       <div className="section">
         <h2>{t('Premium\'da')}</h2>
