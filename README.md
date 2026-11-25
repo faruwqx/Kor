@@ -2,6 +2,17 @@
 
 Strength-training tracker with a rank for each muscle group. A web app (PWA) you can install on your phone and use offline. Your data stays on the device; optionally it is backed up to the cloud with an account.
 
+## Screenshots
+
+<p align="center">
+  <img src="docs/screenshots/today.png" width="24%" alt="Today — weekly streak, next workout, overall rank" />
+  <img src="docs/screenshots/rank.png" width="24%" alt="Rank — overall tier and per-muscle-group breakdown" />
+  <img src="docs/screenshots/bodymap.png" width="24%" alt="Body map — muscles glow by how much you trained them" />
+  <img src="docs/screenshots/trends.png" width="24%" alt="Trends — time, volume and sets over time" />
+</p>
+
+<p align="center"><sub>Today · Rank · Body map · Trends — shown with the built-in demo data (<code>?demo=1</code>).</sub></p>
+
 ## Running
 
 ```
