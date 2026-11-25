@@ -9,6 +9,7 @@
     "lint": "oxlint",
     "preview": "vite preview",
     "ios:sync": "npm run build && cap sync ios",
+    "android:sync": "npm run build && cap sync android",
     "build:hardened": "npm run build && npm run harden:apply",
     "harden:apply": "bla-agents harden dist --apply --intensity balanced --exclude \"mediapipe/**,ocr/**,sw.js,assets/vision_bundle-*,**/*.wasm\"",
     "harden:restore": "bla-agents harden dist --restore"
@@ -26,14 +27,15 @@
     "tesseract.js": "^7.0.0"
   },
   "devDependencies": {
+    "@capacitor/android": "^8.6.0",
     "@capacitor/cli": "8.6.0",
-    "bla-agents": "^3.5.1",
     "@tesseract.js-data/eng": "^1.0.0",
     "@tesseract.js-data/tur": "^1.0.0",
     "@types/node": "^24.19.2",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.1.2",
+    "bla-agents": "^3.5.1",
     "oxlint": "^1.90.0",
     "sharp": "^0.35.5",
     "typescript": "~7.0.2",

@@ -16,7 +16,32 @@ If opened with `?demo=1` (for example `http://localhost:4173/?demo=1`) and nothi
 
 ## Installing on a phone
 
+There are three ways to use Kor on a phone: install it as a web app (PWA), sideload the iOS app (`.ipa`), or sideload the Android app (`.apk`). **iOS is the primary, best-tested target; the Android build is experimental (see the note below).**
+
+### 1. Web app (PWA) — any phone
+
 The `dist/` folder is made of static files; it can be uploaded anywhere that serves over HTTPS (Netlify, Vercel, GitHub Pages, Cloudflare Pages). On the phone, open the address and choose "Add to Home Screen" from the browser menu. The service worker only runs over HTTPS or `localhost`; at a home-network `http://192.168...` address the app opens but does not work offline and cannot be installed.
+
+### 2. iPhone / iPad — sideload the IPA with Sideloadly
+
+The IPA is built automatically in the cloud, so you do **not** need a Mac to produce it.
+
+1. Open the repo's **Actions** tab → the **iOS IPA** workflow → the latest green run → **Artifacts** → download **`Kor-ipa`** (contains `Kor.ipa`).
+2. Install [**Sideloadly**](https://sideloadly.io) on your **Windows PC or Mac** (iTunes + iCloud from apple.com are also needed on Windows). Connect the iPhone by cable and trust the computer.
+3. Drag `Kor.ipa` into Sideloadly, enter your **free Apple ID**, and press **Start**. (An app-specific password may be requested; create one at appleid.apple.com.)
+4. On the iPhone: **Settings → General → VPN & Device Management → [your Apple ID] → Trust**. Open Kor.
+5. A free Apple ID signature lasts **7 days** — re-run Sideloadly with the same IPA to renew. (A paid Apple Developer account lasts a year.)
+
+**Mac alternative (no Sideloadly):** open `ios/App/App.xcodeproj` in Xcode, select your iPhone, set your free Apple ID team under *Signing & Capabilities*, and press Run — Xcode installs it directly. Or drag `Kor.ipa` onto your device in **Apple Configurator**.
+
+### 3. Android — install the APK
+
+> **Note:** The Android build is **experimental and not yet tested**. It is provided so Android users can try Kor, but it may have rough edges; the app runs best on **iOS**. Please report anything that misbehaves.
+
+1. Open the repo's **Actions** tab → the **Android APK** workflow → the latest green run → **Artifacts** → download **`Kor-apk`** (contains `Kor.apk`).
+2. Copy `Kor.apk` to your Android phone (cable, Google Drive, or a direct download).
+3. Tap the file. Android will ask to allow **"Install unknown apps"** for the app you opened it from (Files/Chrome) — enable it, then confirm the install.
+4. Open Kor. It is a debug build signed with a debug key, so Play Protect may show an extra "install anyway" prompt — that is expected for sideloaded apps.
 
 ## How rank is calculated
 

@@ -34,10 +34,10 @@ jobs:
       - name: Bağımlılıklar
         run: npm ci
 
-      - name: Web derlemesi ve testler
+      - name: Web derlemesi (BLA ile sertleştirilmiş) ve testler
         run: |
           npx vitest run
-          npm run build
+          npm run build:hardened
 
       - name: iOS projesine kopyala
         run: npx cap sync ios

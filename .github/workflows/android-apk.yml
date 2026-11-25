@@ -1,0 +1,61 @@
+# Android'e kurulacak APK'yı derler. Ubuntu runner'da Android SDK hazır gelir.
+# Çıktı: Actions → bu iş → Artifacts → "Kor-apk" (Kor.apk). Telefona "bilinmeyen
+# kaynaklardan kurulum" açılıp yüklenir. Android sürümü test edilmedi; iOS daha iyi çalışır.
+name: Android APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, master]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-apk-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Bağımlılıklar
+        run: npm ci
+
+      - name: Web derlemesi (BLA ile sertleştirilmiş) ve testler
+        run: |
+          npx vitest run
+          npm run build:hardened
+
+      - name: Android projesine kopyala
+        run: npx cap sync android
+
+      - name: Debug APK derlemesi
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon
+
+      - name: APK paketi
+        run: |
+          cp android/app/build/outputs/apk/debug/app-debug.apk Kor.apk
+          ls -lh Kor.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Kor-apk
+          path: Kor.apk
+          retention-days: 30
