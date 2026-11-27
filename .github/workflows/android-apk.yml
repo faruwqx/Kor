@@ -47,7 +47,23 @@ jobs:
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon
+          # Maven Central bazen CI runner IP'sini rate-limit'ler (429). Aynaya
+          # rağmen takılırsa artan beklemeyle 3 kez dene.
+          for attempt in 1 2 3; do
+            echo "::group::Gradle denemesi $attempt"
+            if ./gradlew assembleDebug --no-daemon; then
+              echo "::endgroup::"
+              exit 0
+            fi
+            echo "::endgroup::"
+            if [ "$attempt" -lt 3 ]; then
+              wait=$((attempt * 60))
+              echo "Derleme başarısız (muhtemelen 429). ${wait}s bekleyip tekrar denenecek..."
+              sleep "$wait"
+            fi
+          done
+          echo "Üç deneme de başarısız oldu."
+          exit 1
 
       - name: APK paketi
         run: |

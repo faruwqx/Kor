@@ -1,9 +1,12 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
-    
+
     repositories {
         google()
+        // Maven Central'ın Google aynası: CI'da paylaşımlı IP'lerin yediği
+        // "429 Too Many Requests" hatasını azaltmak için önce buradan çözülür.
+        maven { url 'https://maven-central.storage-download.googleapis.com/maven2/' }
         mavenCentral()
     }
     dependencies {
@@ -20,6 +23,7 @@ apply from: "variables.gradle"
 allprojects {
     repositories {
         google()
+        maven { url 'https://maven-central.storage-download.googleapis.com/maven2/' }
         mavenCentral()
     }
 }
